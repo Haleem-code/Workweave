@@ -21,6 +21,7 @@ from .models import Login, SignUp, CompanyInput, ProfileInput, ProviderPolicy, I
 from .understanding import current_chunks, suggest_people, draft_profile
 from .identity import account_view
 from . import ingestion, demo
+from .models import default_provider_policy, effective_provider_policy
 
 
 class Credential(BaseModel):
@@ -65,7 +66,7 @@ def create_app(config: Settings = settings):
     async def same_origin(request, next_call):
         if request.method not in ("GET", "HEAD", "OPTIONS"):
             origin = request.headers.get("origin")
-            if origin and urlparse(origin).netloc != request.headers.get("host"):
+            if origin and urlparse(origin).netloc != request.headers.get("host") and origin not in config.allowed_origins:
                 return JSONResponse({"detail": "Cross-origin writes are not allowed"}, status_code=403)
         response = await next_call(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -209,7 +210,7 @@ def create_app(config: Settings = settings):
             company = {
                 "id": uid("company"),
                 "name": comp_name,
-                "provider_policy": ProviderPolicy().model_dump(),
+                "provider_policy": default_provider_policy(),
                 "created_at": now()
             }
             await graph.schema("ww_" + company["id"])
@@ -283,7 +284,7 @@ def create_app(config: Settings = settings):
     @app.post("/api/v1/companies")
     async def create_company(body: CompanyInput, account=Depends(user)):
         async with engine.write_lock:
-            company = {"id": uid("company"), "name": body.name, "provider_policy": ProviderPolicy().model_dump()}
+            company = {"id": uid("company"), "name": body.name, "provider_policy": default_provider_policy()}
             await graph.schema("ww_" + company["id"])
             await control.put("company", company)
             await control.put("member", {"id": company["id"] + ":" + account["id"], "company_id": company["id"], "user_id": account["id"], "role": "admin"})
@@ -400,7 +401,7 @@ def create_app(config: Settings = settings):
     @app.get("/api/v1/companies/{company_id}/providers")
     async def providers(company_id: str, access=Depends(workspace)):
         company = await control.get("company", company_id)
-        return {"providers": await router.readiness(), "policy": company["provider_policy"], "embedding_model": config.embedding_model, "private_drive_enabled": config.allow_private_drive}
+        return {"providers": await router.readiness(), "policy": effective_provider_policy(company), "embedding_model": config.embedding_model, "private_drive_enabled": config.allow_private_drive}
 
     @app.put("/api/v1/companies/{company_id}/providers/policy")
     async def policy(body: ProviderPolicy, company_id: str, access=Depends(workspace)):

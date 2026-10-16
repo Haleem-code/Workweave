@@ -49,7 +49,7 @@ class ProfileInput(BaseModel):
 class ProviderPolicy(BaseModel):
     # Production default for newly created workspaces. Existing saved policies
     # remain unchanged; onboarding discloses hosted processing before signup.
-    allowed: list[Literal["groq", "gemini", "ollama_cloud", "ollama"]] = Field(default_factory=lambda: ["ollama_cloud"])
+    allowed: list[Literal["groq", "gemini", "ollama_cloud", "ollama"]] = Field(default_factory=lambda: ["ollama_cloud", "groq", "gemini", "ollama"])
     local_only: bool = False
     cloud_consent: bool = True
 
@@ -58,6 +58,17 @@ class ProviderPolicy(BaseModel):
         if self.local_only and self.cloud_consent:
             raise ValueError("Choose cloud processing or self-hosted only; both cannot be enabled together.")
         return self
+
+
+def default_provider_policy() -> dict:
+    """Application-wide default for signup, workspace creation, and inheritance."""
+    return ProviderPolicy().model_dump()
+
+
+def effective_provider_policy(company: dict) -> dict:
+    # A saved preference is an override. A workspace with no preference inherits
+    # the same application default shown at signup, never a legacy local fallback.
+    return company.get("provider_policy") or default_provider_policy()
 
 
 class PersonInput(BaseModel):

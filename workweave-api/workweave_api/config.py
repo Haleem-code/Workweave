@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     google_redirect_uri: str = "http://localhost:8080/api/v1/google/callback"
     allow_private_drive: bool = False
     allowed_hosts: list[str] = ["localhost", "127.0.0.1", "api"]
+    # Exact browser origins permitted when a separate frontend proxies requests.
+    # This does not enable CORS or trust client-supplied forwarding headers.
+    allowed_origins: list[str] = []
     frontend_dir: Path = Path(__file__).resolve().parents[2] / "workweave-web" / "dist"
 
     @property

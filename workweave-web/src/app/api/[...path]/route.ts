@@ -3,7 +3,8 @@ import { request as httpsRequest } from 'node:https'
 import { Readable } from 'node:stream'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-// Node HTTP preserves Host explicitly; fetch may replace it with the API destination.
+// Local Compose preserves the browser Host. Fly's public proxy instead needs
+// the upstream Host for routing; the API permits only configured browser origins.
 async function proxy(request: Request) {
   const incoming = new URL(request.url)
   const backend = process.env.API_URL || (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8088' : 'http://api:8000')
@@ -11,6 +12,7 @@ async function proxy(request: Request) {
   const headers: Record<string,string> = Object.fromEntries(request.headers)
   for (const key of ['connection','transfer-encoding','content-length','accept-encoding']) delete headers[key]
   if (!headers.host) return Response.json({detail:'Missing request host'}, {status:400})
+  if (process.env.API_PROXY_HOST_MODE === 'upstream') headers.host = target.host
   const body = ['GET','HEAD'].includes(request.method) ? undefined : Buffer.from(await request.arrayBuffer())
   if (body) headers['content-length'] = String(body.length)
   try {
@@ -32,7 +34,7 @@ async function proxy(request: Request) {
       upstream.end(body)
     })
   } catch {
-    return Response.json({detail:'The Workweave API is unavailable. Check the local service and retry.'},{status:502})
+    return Response.json({detail:'The Workweave API is unavailable. Please retry shortly.'},{status:502})
   }
 }
 export { proxy as GET, proxy as POST, proxy as PUT, proxy as PATCH, proxy as DELETE, proxy as OPTIONS, proxy as HEAD }

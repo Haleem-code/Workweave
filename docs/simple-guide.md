@@ -34,7 +34,7 @@ The original founder run selected the local Ollama model and failed about 199 se
 
 Current changes remove a fixed 35-second Groq pacing delay, avoid embeddings when six or fewer current excerpts fit in context, give embeddings an eight-second retrieval budget for larger corpora, and answer narrow supported facts directly from source text. Ordinary questions use one generation call instead of starting an MCP tool session. Relationship and action requests retain the tool loop. Slow local generation is bounded to 60 seconds per attempt and is not immediately retried after a timeout. The UI checks persisted run state after a dropped event stream.
 
-General answers still depend on your model, hardware, graph latency, and provider availability. Hosted processing requires explicit workspace consent in Settings. These changes do not silently enable cloud inference or modify `.env`.
+General answers still depend on your model, hardware, graph latency, and provider availability. New workspaces select Ollama Cloud after the setup disclosure; existing workspaces retain their saved policies. Choose **Settings → AI answers** for Ollama Cloud, Self-hosted Ollama, or Custom providers. Provider selection does not modify `.env`.
 
 ## Navigation and history
 
