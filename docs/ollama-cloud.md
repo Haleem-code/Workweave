@@ -2,7 +2,7 @@
 
 Ollama Cloud is a separate answer provider (`ollama_cloud`). It calls `https://ollama.com/api/chat` from the backend with Bearer authentication. It uses the same evidence, graph tools, tool receipts, and persisted conversations as the other providers. The default cloud model is `gemma4:31b`; the hosting environment can override `WORKWEAVE_OLLAMA_CLOUD_MODEL` with a currently supported model name.
 
-New workspaces select **Ollama Cloud** by default, with cloud processing enabled and other answer providers excluded. Signup explains that questions and relevant excerpts go to Ollama. Existing workspaces retain their saved processing preferences; select Ollama Cloud once in Settings to switch. Embedding settings remain unchanged.
+New workspaces select **Ollama Cloud** by default, with cloud processing enabled. The application tries Ollama Cloud first, then configured Groq, Gemini, and self-hosted Ollama fallbacks. Signup discloses cloud processing and fallback providers. Existing workspaces retain their saved processing preferences; select Ollama Cloud once in Settings to switch. Embedding settings remain unchanged.
 
 Model settings must contain a model identifier, not a URL. Malformed values (for example, pasted URL text after the model name) fall back to `gemma4:31b` for both displayed status and outbound requests, with a configuration warning in Settings. The application does not rewrite your environment file. Syntactically valid names still need to be available on Ollama Cloud.
 
@@ -16,7 +16,7 @@ Model settings must contain a model identifier, not a URL. Malformed values (for
    ```
 
    Paste the key at the hidden prompt. The helper stores it in the existing encrypted backend vault, passes it through stdin, and leaves `.env` unchanged. Use `--compose docker-compose.yml` only if you run the local-database compose stack instead.
-3. Open Workweave **Settings → AI answers**, select **Ollama Cloud**, and click **Save preferences**. It is already selected for new workspaces. Choose **Self-hosted Ollama** to exclude cloud answer providers, or **Custom providers** for explicit fallback choices. These three modes are mutually exclusive.
+3. Open Workweave **Settings â†’ AI answers**, select **Ollama Cloud**, and click **Save preferences**. It is already selected for new workspaces. Choose **Self-hosted Ollama** to exclude cloud answer providers, or **Custom providers** for explicit fallback choices. These three modes are mutually exclusive.
 4. Ask a question supported by your uploaded documents. Inspect the saved run's provider. A direct source fact may be answered without any model; use a question requiring synthesis to verify an actual Cloud call. A configured key is not a live connectivity test.
 
 Alternatively, the platform administrator can save the key through the Ollama Cloud row in Settings. Company administrators may change their own processing policy but cannot change credentials shared by every workspace.

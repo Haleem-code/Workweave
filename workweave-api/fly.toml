@@ -10,7 +10,9 @@ kill_timeout = "30s"
 [env]
   WORKWEAVE_DATA_DIR = "/data/workweave"
   WORKWEAVE_SECURE_COOKIES = "true"
-  WORKWEAVE_ALLOWED_HOSTS = '["localhost","127.0.0.1","*.fly.dev"]'
+  WORKWEAVE_ALLOWED_HOSTS = '["localhost","127.0.0.1","api","workweave.fly.dev"]'
+  WORKWEAVE_ALLOWED_ORIGINS = '["https://workweave-web.fly.dev"]'
+  WORKWEAVE_GOOGLE_REDIRECT_URI = "https://workweave-web.fly.dev/api/v1/google/callback"
   WORKWEAVE_GRAPH_TLS = "true"
   WORKWEAVE_OLLAMA_CLOUD_MODEL = "gemma4:31b"
   WORKWEAVE_ALLOW_PRIVATE_DRIVE = "false"

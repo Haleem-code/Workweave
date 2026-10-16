@@ -6,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from workweave_api.config import Settings
-from workweave_api.models import ProviderPolicy
+from workweave_api.models import ProviderPolicy, default_provider_policy, effective_provider_policy
 from workweave_api.providers import ProviderError, Router
 
 
@@ -148,11 +148,23 @@ async def test_cloud_key_stays_private_and_survives_restart(tmp_path):
 
 def test_new_workspace_cloud_default_and_exclusive_processing_modes():
     assert ProviderPolicy().model_dump() == {
-        "allowed": ["ollama_cloud"], "cloud_consent": True, "local_only": False,
+        "allowed": ["ollama_cloud", "groq", "gemini", "ollama"], "cloud_consent": True, "local_only": False,
     }
     with pytest.raises(ValidationError, match="both cannot be enabled"):
         ProviderPolicy(local_only=True, cloud_consent=True)
     assert ProviderPolicy(allowed=["ollama"], local_only=True, cloud_consent=False).local_only
+
+
+def test_application_default_is_shared_without_overwriting_saved_choices():
+    expected = {'allowed': ['ollama_cloud', 'groq', 'gemini', 'ollama'], 'cloud_consent': True, 'local_only': False}
+    assert default_provider_policy() == expected
+    assert effective_provider_policy({}) == expected
+    assert effective_provider_policy({'provider_policy': None}) == expected
+    first = default_provider_policy()
+    first['allowed'].append('groq')
+    assert default_provider_policy() == expected
+    saved = {'allowed': ['ollama'], 'cloud_consent': False, 'local_only': True}
+    assert effective_provider_policy({'provider_policy': saved}) == saved
 
 
 @pytest.mark.asyncio
@@ -182,12 +194,37 @@ async def test_cloud_model_status_matches_outbound_request(tmp_path, configured,
 
 
 @pytest.mark.asyncio
-async def test_default_cloud_missing_key_does_not_send_to_another_provider(tmp_path):
+async def test_explicit_cloud_only_policy_does_not_send_to_another_provider(tmp_path):
     def unexpected(request):
         pytest.fail("No request should be sent when the only permitted provider has no key")
     router = Router(Settings(_env_file=None, data_dir=tmp_path, ollama_cloud_key="", groq_key="synthetic-groq-key"), httpx.MockTransport(unexpected))
     try:
         with pytest.raises(ProviderError, match="No permitted provider"):
-            await router.generate(MESSAGES, ProviderPolicy().model_dump())
+            await router.generate(MESSAGES, CLOUD_POLICY)
+    finally:
+        await router.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('cloud_status', [200, 401, 429, 503])
+async def test_cloud_is_primary_and_configured_fallbacks_remain_available(tmp_path, cloud_status):
+    hosts = []
+    def respond(request):
+        hosts.append(request.url.host)
+        if request.url.host == 'ollama.com':
+            if cloud_status == 200:
+                return httpx.Response(200, text='{"message":{"content":"READY"},"done":true}\n')
+            return httpx.Response(cloud_status)
+        assert request.url.host == 'api.groq.com'
+        return httpx.Response(200, text='data: ' + json.dumps({'choices': [{'delta': {'content': 'Fallback answer'}, 'finish_reason': 'stop'}]}) + '\n\ndata: [DONE]\n')
+    router = Router(config(tmp_path, groq_key='synthetic-groq-key'), httpx.MockTransport(respond))
+    try:
+        result = await router.generate(MESSAGES, default_provider_policy())
+        assert hosts[0] == 'ollama.com'
+        assert result['provider'] == ('ollama_cloud' if cloud_status == 200 else 'groq')
+        if cloud_status == 200:
+            assert hosts == ['ollama.com']
+        else:
+            assert hosts[-1] == 'api.groq.com'
     finally:
         await router.close()

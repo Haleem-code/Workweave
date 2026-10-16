@@ -1,0 +1,32 @@
+# Working directory: workweave-web / Config path: fly.toml
+primary_region = "lhr"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "80"
+  HOSTNAME = "0.0.0.0"
+  API_URL = "https://workweave.fly.dev"
+  API_PROXY_HOST_MODE = "upstream"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/v1/health"
+    interval = "30s"
+    timeout = "10s"
+    grace_period = "30s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"

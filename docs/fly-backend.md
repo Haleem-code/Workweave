@@ -46,9 +46,10 @@ Keep the volume and its backups; do not delete it when redeploying.
 
 After a successful launch, check `https://YOUR-API-APP.fly.dev/api/v1/health`.
 Opening `/` is not a frontend test: this app only serves the backend. Its graph
-connection is required during startup. The frontend needs a separate deployment
-and proxy configuration before sign-in and browser writes work across the two
-apps. Custom domains must be explicitly added to `WORKWEAVE_ALLOWED_HOSTS`.
+connection is required during startup. The frontend is now deployed at
+https://workweave-web.fly.dev. See [frontend setup](fly-frontend.md) for the exact
+origin allowlist, proxy mode, and Google callback. Custom domains must be
+explicitly added to the appropriate hostname/origin settings.
 
 Document embeddings also need a reachable Ollama embedding server containing
 `embeddinggemma:300m`, configured via `WORKWEAVE_OLLAMA_URL`. The default localhost

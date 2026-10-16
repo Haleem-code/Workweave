@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 import httpx
 from fastapi import Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from .models import DriveSelection, ProviderPolicy
+from .models import DriveSelection, default_provider_policy
 from .store import now, uid
 from .ingestion import preview, confirm, revoke
 
@@ -144,7 +144,7 @@ def register_drive(app, config, router, control, workspace, administrator, engin
                 company = {
                     "id": uid("company"),
                     "name": f"{name}'s Workspace",
-                    "provider_policy": ProviderPolicy().model_dump(),
+                    "provider_policy": default_provider_policy(),
                     "created_at": now()
                 }
                 if graph:

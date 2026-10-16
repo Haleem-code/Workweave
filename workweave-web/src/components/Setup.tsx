@@ -159,7 +159,7 @@ export function Setup({ onSuccess, onSwitchToSignIn, onCancel, resumeCompany, in
             {!company && <div className="ww-setup-account-row"><label>Email or username<input value={username} onChange={e => setUsername(e.target.value)} autoComplete="username" required minLength={3} maxLength={128} placeholder="you@company.com" /></label><label>Password<input type="password" value={password} onChange={e => setPassword(e.target.value)} autoComplete="new-password" required minLength={12} maxLength={128} placeholder="At least 12 characters" /></label></div>}
             {company && <p className="ww-setup-account-note"><Check size={16} />Signed in as {account?.username}</p>}
             <label>What does your company do? <span className="optional">Optional</span><textarea value={profile.description} onChange={e => update('description', e.target.value)} placeholder="A sentence about your company, or add a company guide next." rows={3} maxLength={10000} /></label>
-            {!company && <p className="ww-setup-document-hint">Your workspace starts with Ollama Cloud for AI answers. Questions and relevant document excerpts are sent to Ollama when you ask. You can change this in Settings before asking a question.</p>}
+            {!company && <p className="ww-setup-document-hint">Your workspace starts with Ollama Cloud for AI answers. Questions and relevant excerpts are sent to Ollama Cloud, or a configured Groq or Gemini fallback if needed. You can change this in Settings before asking a question.</p>}
           </fieldset>
         </form>}
 

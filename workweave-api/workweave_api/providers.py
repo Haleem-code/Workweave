@@ -9,7 +9,7 @@ from pydantic import SecretStr
 from .config import Settings
 from .store import uid
 
-PROVIDER_ORDER = ("groq", "gemini", "ollama_cloud", "ollama")
+PROVIDER_ORDER = ("ollama_cloud", "groq", "gemini", "ollama")
 PROVIDER_LABELS = {"groq": "Groq", "gemini": "Gemini", "ollama_cloud": "Ollama Cloud", "ollama": "Ollama (self-hosted)"}
 OLLAMA_CLOUD_CHAT_URL = "https://ollama.com/api/chat"
 

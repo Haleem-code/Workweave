@@ -62,7 +62,14 @@ async def test_signup_cannot_change_runtime_secrets_and_setup_persists(tmp_path)
             assert (await first.put(base + '/providers/ollama_cloud/key', json={'key': 'test-only-key-never-saved'})).status_code == 403
             assert app.state.router.vault.read() == {}
             cloud_policy = {'allowed': ['ollama_cloud'], 'cloud_consent': True, 'local_only': False}
-            assert (await first.get(base + '/providers')).json()['policy'] == cloud_policy
+            app_default = {'allowed': ['ollama_cloud', 'groq', 'gemini', 'ollama'], 'cloud_consent': True, 'local_only': False}
+            assert (await first.get(base + '/providers')).json()['policy'] == app_default
+            # Older workspaces with no stored preference inherit the app-wide
+            # default in Settings, just as generation does.
+            company = await control.get('company', created['company_id'])
+            company.pop('provider_policy')
+            await control.put('company', company)
+            assert (await first.get(base + '/providers')).json()['policy'] == app_default
             legacy_policy = {'allowed': ['groq', 'gemini', 'ollama'], 'cloud_consent': False, 'local_only': False}
             assert (await first.put(base + '/providers/policy', json=legacy_policy)).status_code == 200
             assert (await first.get(base + '/providers')).json()['policy'] == legacy_policy
@@ -110,5 +117,24 @@ async def test_unconfigured_google_is_not_advertised(tmp_path):
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://local.test') as client:
         assert (await client.get('/api/v1/auth/options')).json() == {'google': False}
         assert (await client.get('/api/v1/auth/google/url')).status_code == 409
+    await app.state.router.close()
+    await app.state.graph.close()
+
+
+@pytest.mark.asyncio
+async def test_frontend_origin_allowlist_does_not_trust_forwarded_headers(tmp_path):
+    config = Settings(_env_file=None, data_dir=tmp_path, allowed_hosts=['api.test'],
+                      allowed_origins=['https://web.test'], allow_private_drive=False,
+                      google_client_id='', google_client_secret='')
+    app = create_app(config)
+    # No lifespan or database is needed: POST to a GET-only endpoint returns
+    # 405. A disallowed Origin must be rejected first, with 403.
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url='https://api.test') as client:
+        for origin, expected in [('https://web.test', 405), ('https://evil.test', 403),
+                                 ('https://web.test.evil.test', 403), ('http://web.test', 403),
+                                 ('null', 403), ('https://api.test', 405)]:
+            response = await client.post('/api/v1/auth/google/url', headers={
+                'Origin': origin, 'X-Forwarded-Host': 'web.test', 'X-Forwarded-Proto': 'https'})
+            assert response.status_code == expected, response.text
     await app.state.router.close()
     await app.state.graph.close()
