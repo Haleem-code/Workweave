@@ -1,0 +1,51 @@
+name: workweave
+services:
+  frontend:
+    build: ./workweave-web
+    environment:
+      API_URL: http://api:8000
+    ports: ["127.0.0.1:8080:80"]
+    depends_on:
+      api: {condition: service_healthy}
+    restart: unless-stopped
+  api:
+    build: ./workweave-api
+    env_file: .env
+    environment:
+      WORKWEAVE_GRAPH_URL: ${WORKWEAVE_GRAPH_URL:-redis://falkordb:6379}
+      WORKWEAVE_OLLAMA_URL: http://ollama:11434
+      WORKWEAVE_DATA_DIR: /data/workweave
+    volumes: ["credentials:/data/workweave"]
+    depends_on:
+      falkordb: {condition: service_healthy}
+      ollama: {condition: service_started}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+  falkordb:
+    image: falkordb/falkordb@sha256:e2765e207e5ba4ee90e47ed31eb7491ad6dd3d42241c326e429375c02ad9882f
+    environment:
+      BROWSER: "0"
+      FALKORDB_DATA_PATH: /data
+      REDIS_ARGS: "--appendonly yes --appendfsync everysec --save 60 1"
+    volumes: ["graph:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+  ollama:
+    image: ollama/ollama:0.40.1@sha256:69f27594d8127cb43db1edcafa5e2d3cd8f88bdbc54a2cf3ceb11b8d138a24b1
+    environment:
+      OLLAMA_NUM_PARALLEL: "1"
+    volumes: ["models:/root/.ollama"]
+    restart: unless-stopped
+volumes:
+  graph:
+  models:
+  credentials:
+

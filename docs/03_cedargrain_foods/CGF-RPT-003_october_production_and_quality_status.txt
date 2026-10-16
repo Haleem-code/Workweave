@@ -1,0 +1,25 @@
+Cedargrain Foods October Production and Quality Status
+
+Document ID: CGF-RPT-003
+Version: 1.0
+As of: 2026-10-15
+Classification: Fictional company test fixture
+Prepared for: Bisi Adeyemi
+
+SUMMARY
+As of 2026-10-15, Cedargrain has 16,000 finished retail packs across three lots. Of these, 4,000 packs are on hold and 12,000 packs are released. These are inventory quantities, not sales quantities or carton counts. Bisi Adeyemi owns the unresolved quality decision.
+
+LOT REGISTER
+Lot CGF-LOT-410 contains 4,000 packs of CGF-P-10 Millet Breakfast Mix. Status: on hold pending review of incomplete packaging inspection records. No release decision has been recorded. Lot CGF-LOT-411 contains 7,000 packs of CGF-P-10 and was released by Bisi Adeyemi on 2026-10-13. Lot CGF-LOT-412 contains 5,000 packs of CGF-P-20 Sorghum Grain Blend and was released by Bisi Adeyemi on 2026-10-14.
+
+CUSTOMER ALLOCATIONS
+Order CGF-SO-701 allocates all 4,000 packs from CGF-LOT-410 to Maple Wholesale, required on 2026-10-20. The allocation remains blocked by the hold. Order CGF-SO-702 allocates 6,000 released packs from CGF-LOT-411 to Hillcrest Stores, required on 2026-10-21. Order CGF-SO-703 allocates 3,000 released packs from CGF-LOT-412 to Vale Market, required on 2026-10-22. Unallocated released stock is therefore 3,000 packs.
+
+PACKAGING DEPENDENCY
+Cedargrain expects 400 outer cartons under the KoraBridge customer order KBL-SO-101. The logistics status report revises the supporting supplier arrival to 2026-10-22. That outer carton dependency is separate from the quality hold on CGF-LOT-410. Releasing a lot does not itself supply missing cartons.
+
+PROJECT AND NEXT ACTIONS
+Project Orchard remains targeted for 2026-11-13 within its NGN 12,500,000 budget. Femi Oladele must provide the missing inspection records by 2026-10-16 at 10:00 Africa/Lagos. Bisi Adeyemi will review them after receipt. There is no confirmed release date and no confirmed rejection decision.
+
+IMPORTANT LIMITATIONS
+The documents do not state a laboratory result, recall decision, food safety conclusion, or revised customer delivery promise. Do not invent these facts. Apply CGF-OPS-002 when describing internal release authority.

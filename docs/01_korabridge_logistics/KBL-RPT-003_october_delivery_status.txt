@@ -1,0 +1,25 @@
+KoraBridge Logistics October Delivery Status
+
+Document ID: KBL-RPT-003
+Version: 1.0
+As of: 2026-10-15
+Classification: Fictional company test fixture
+Prepared for: Ada Bello
+
+DECISION REQUIRED
+Ada Bello should review KBL-SO-101 and KBL-SO-102 because their dispatches depend on cartons that arrive after their required dates. Tunde Akin owns validation and the revised dispatch recommendation. No customer notification has been sent as of 2026-10-15.
+
+SUPPLIER CONFIRMATION
+Purchase order KBL-PO-101 is for 1,000 cartons from Northpoint Cartons, supplier KBL-SUP-01. The supplier revised its confirmed delivery from 2026-10-16 to 2026-10-22 on 2026-10-15. The purchase order is open. Incoming cartons are reserved for product KBL-P-01, Standard carton. No usable stock exists for KBL-P-01.
+
+CUSTOMER COMMITMENTS
+KBL-SO-101 is for Cedargrain Foods: 400 units of KBL-P-01 required on 2026-10-19. KBL-SO-102 is for Beacon Homewares: 300 units of KBL-P-01 required on 2026-10-20. Both depend on KBL-PO-101. KBL-SO-103 is for Elm Office Supply: 200 units of KBL-P-01 required on 2026-10-26 and also depends on KBL-PO-101. The incoming 1,000 cartons cover the combined 900 units, leaving 100 units unallocated.
+
+STOCK AND INDEPENDENT SUPPLY
+KBL-SO-104 is for 120 insulated packs, product KBL-P-02, required on 2026-10-18. There are 200 usable units of KBL-P-02 reserved for this order; it is covered by stock. KBL-SO-105 is for 80 pallet wraps, product KBL-P-03, required on 2026-10-19. It depends on separate purchase order KBL-PO-102 from FleetArc Workshop, confirmed for 2026-10-17. KBL-PO-102 has not changed.
+
+ASSESSMENT AND NEXT CHECKPOINT
+KBL-SO-103 is not late because its required date follows the revised supplier arrival. KBL-SO-104 is covered by stock. KBL-SO-105 uses unaffected supply. Tunde Akin will validate alternative cartons by 2026-10-16 at 12:00 Africa/Lagos. The report does not confirm that any alternative supplier has accepted an order.
+
+PROJECT CONTEXT
+Project Atlas remains targeted for 2026-11-20 with a budget of NGN 18,000,000. The delivery exception must be handled under KBL-OPS-002 and must not be confused with Meridian Harbor Software project Atlas.

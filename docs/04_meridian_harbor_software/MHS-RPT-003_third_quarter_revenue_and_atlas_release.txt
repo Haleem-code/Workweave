@@ -1,0 +1,25 @@
+Meridian Harbor Software Third Quarter Revenue and Atlas Release
+
+Document ID: MHS-RPT-003
+Version: 1.0
+As of: 2026-10-15
+Classification: Fictional company test fixture
+Prepared for: Ada Bello
+
+EXECUTIVE ASSESSMENT
+Third quarter 2026 recognized revenue is NGN 36,000,000, up from NGN 30,000,000 in the second quarter. Gross profit is NGN 25,200,000. Project Atlas remains planned for 2026-11-06; it has not shipped as of 2026-10-15.
+
+REVENUE DETAIL
+The reporting period is 2026-07-01 through 2026-09-30. July recognized revenue is NGN 11,000,000; August is NGN 12,000,000; September is NGN 13,000,000. By product, TeamDesk contributes NGN 24,000,000 and LaunchPath contributes NGN 12,000,000. Both monthly and product views total NGN 36,000,000 and must not be added together.
+
+COSTS AND PROFITABILITY
+Third quarter cost of service is NGN 10,800,000. Gross profit equals recognized revenue less cost of service: NGN 25,200,000. Gross margin is 70 percent. Operating expenses are NGN 20,400,000, producing operating profit of NGN 4,800,000. This report does not provide taxes, interest, net profit, cash receipts, or annual recurring revenue.
+
+QUARTER COMPARISON
+Second quarter recognized revenue is NGN 30,000,000. The increase of NGN 6,000,000 is 20 percent of the second quarter baseline. All quarter comparisons in this report use recognized revenue rather than bookings or cash collected.
+
+ATLAS RELEASE STATUS
+Daniel Eze owns Project Atlas with an approved budget of NGN 9,600,000. Pilot testing is complete for three customers, but one accessibility issue remains open under MHS-ISS-88. Engineering must verify the fix by 2026-10-23. Ada Bello will prepare pilot communication after release approval. The planned release date remains 2026-11-06.
+
+PILOT QUALIFICATION
+Sunvale Energy Systems participates in a free LaunchPath evaluation. It has no signed paid subscription as of 2026-10-15 and contributes zero to the recognized revenue figures above. The Atlas release described here is unrelated to the KoraBridge Logistics dispatch planning project.

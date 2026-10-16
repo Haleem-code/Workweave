@@ -1,0 +1,14 @@
+fastapi==0.143.0
+uvicorn==0.54.0
+redis==8.1.0
+httpx==0.28.1
+pydantic-settings==2.15.0
+python-multipart==0.0.32
+openpyxl==3.1.5
+python-docx==1.2.0
+pypdf==6.20.0
+argon2-cffi==25.1.0
+cryptography==50.0.2
+mcp==1.30.0
+jsonschema==4.26.0
+rpds-py==2026.9.1

@@ -1,0 +1,25 @@
+Sunvale Energy Systems Project Lumen October Progress
+
+Document ID: SES-RPT-003
+Version: 1.0
+As of: 2026-10-15
+Classification: Fictional company test fixture
+Prepared for: Mariam Okeke
+
+OVERALL STATUS
+Project Lumen is amber as of 2026-10-15. The programme target remains 2026-12-04 and the approved budget remains NGN 64,000,000. There is no approved budget increase and no customer accepted change to a contractual handover date.
+
+SITE PROGRESS
+SES-SITE-A has completed installation and commissioning. Its customer signed handover on 2026-10-09. SES-SITE-B has completed mounting and cabling but is blocked pending battery delivery. Its target handover is 2026-11-06. SES-SITE-C has completed design approval, while installation is planned to start on 2026-11-16. Its target handover is 2026-12-04.
+
+BATTERY DEPENDENCY
+Voltcrest Storage revised delivery for SES-PO-221 from 2026-10-20 to 2026-10-29. The first battery allocation is reserved for SES-SITE-B. The revised arrival leaves eight calendar days before the site target of 2026-11-06. Ibrahim Sani must confirm that commissioning resources can use that window. The report identifies schedule exposure but does not conclude that the site target has already been missed.
+
+FINANCIAL POSITION
+Approved budget: NGN 64,000,000. Cash spend to date: NGN 29,500,000. Open committed purchase orders not yet paid: NGN 21,000,000. Uncommitted budget: NGN 13,500,000. These categories are mutually exclusive at this reporting date and reconcile to the approved budget. They are not revenue or profit.
+
+OPEN DECISIONS
+Ibrahim Sani will confirm a commissioning slot by 2026-10-19. Mariam Okeke will review the critical path on 2026-10-20. A proposed express freight option would add NGN 1,200,000; it has not been approved. Under SES-OPS-002, the Managing Director must approve that amount even if the programme completion date stays unchanged.
+
+TRANSPORT REQUEST
+The request sent to KoraBridge Logistics is a quotation request only. No freight cost, transport acceptance, or supplier booking is confirmed in this report.
