@@ -1,5 +1,4 @@
 from .ingestion import preview, confirm
-from .store import uid
 
 
 PROFILE = {
@@ -18,12 +17,12 @@ TABLES = {
 UPDATED = TABLES["PurchaseOrders.csv"].replace("2026-10-16", "2026-10-23")
 
 
-async def seed(store, router):
+async def seed(store, router, *, resume=False):
     existing = await store.get("profile", "profile")
-    if existing:
+    if existing and not (resume and existing.get("demo_fixture") == "harbor_supply"):
         raise ValueError("Load the demo into a new empty workspace")
-    await store.put("profile", dict(PROFILE))
-    await store.put("procedure", {"id": uid("procedure"), "text": PROFILE["procedure"], "version": 1, "approved": True, "active": True})
+    await store.put("profile", {**PROFILE, "demo_fixture": "harbor_supply"})
+    await store.put("procedure", {"id": "demo_procedure", "text": PROFILE["procedure"], "version": 1, "approved": True, "active": True})
     for name, text in {**TABLES, "Company-guide.md": PROFILE["description"] + "\n\n" + PROFILE["procedure"]}.items():
         result = await preview(store, name, text.encode())
         job = await store.get("import", result["id"])

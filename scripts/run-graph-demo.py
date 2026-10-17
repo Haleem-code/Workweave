@@ -58,7 +58,10 @@ def main(argv=None):
         tasks = [task for task in api(base + '/tasks') if task['run_id'] == run_id]
         if len(tasks) != 2:
             raise RuntimeError('Expected two internal review tasks')
-        print('Verified: SO1 and SO2 affected; SO3, SO4, and SO5 excluded; two review tasks saved.')
+        review = run.get('impact_review', {})
+        if {item['entity_id'] for item in review.get('excluded', [])} != {'SalesOrder:SO3', 'SalesOrder:SO4'}:
+            raise RuntimeError('Expected date and stock exclusions for SO3 and SO4')
+        print('Verified: SO1/SO2 affected; SO3/SO4 excluded with evidence; SO5 outside the assessed paths; two review tasks saved.')
         print('Open your workspace menu in the browser, choose this company, and inspect Home.')
         print('This is a real deterministic graph workflow; it does not simulate an LLM response.')
     finally:

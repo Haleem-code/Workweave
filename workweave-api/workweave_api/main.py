@@ -20,7 +20,7 @@ from .engine import Engine
 from .models import Login, SignUp, CompanyInput, ProfileInput, ProviderPolicy, ImportConfirmation, MessageInput, TaskUpdate, PersonInput
 from .understanding import current_chunks, suggest_people, draft_profile
 from .identity import account_view
-from . import ingestion, demo
+from . import ingestion
 from .models import default_provider_policy, effective_provider_policy
 
 
@@ -557,8 +557,17 @@ def create_app(config: Settings = settings):
     async def demonstration(company_id: str, access=Depends(workspace)):
         administrator(access)
         async with engine.write_lock:
-            job = await demo.seed(access[0], router)
-            return {"runs": await activate_changes(company_id, access[0], access[1], job, deterministic=True), "mode": "Deterministic graph workflow using synthetic data"}
+            store, account, _ = access
+            run = await store.get("run", "demo_setup")
+            if not run:
+                if await store.get("profile", "profile") or await store.list("source", 1) or await store.list("entity", 1):
+                    raise ValueError("Load the demo into a new empty workspace")
+                conversation = await store.put("conversation", {"id": uid("conversation"), "user_id": account["id"], "title": "Harbor Supply example"})
+                run = await store.put("run", {"id": "demo_setup", "user_id": account["id"], "conversation_id": conversation["id"],
+                    "query": "Prepare Harbor Supply example", "shared": True, "demo": True, "demo_setup": True,
+                    "status": "queued", "checkpoint": "preparing_example", "events": [], "findings": [], "paths": []})
+                await engine.enqueue(company_id, run["id"])
+            return {"runs": [run], "mode": "Deterministic graph workflow using synthetic data"}
 
     # Optional connector is registered separately; the event profile disables private Drive.
     from .drive import register_drive

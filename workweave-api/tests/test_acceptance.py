@@ -42,6 +42,14 @@ async def test_graph_workflow_isolation_reconciliation_and_recovery(tmp_path):
                 await asyncio.sleep(.05)
             assert run['status']=='completed',run
             assert {f['entity_id'] for f in run['findings']}=={'SalesOrder:SO1','SalesOrder:SO2'}
+            review = run['impact_review']
+            assert review['candidate_count'] == 4
+            exclusions = {item['entity_id']: item for item in review['excluded']}
+            assert set(exclusions) == {'SalesOrder:SO3', 'SalesOrder:SO4'}
+            assert '2026-10-28' in exclusions['SalesOrder:SO3']['reason']
+            assert '30 unallocated units cover 10' in exclusions['SalesOrder:SO4']['reason']
+            assert all(item['evidence_ids'] for item in exclusions.values())
+            assert 'SalesOrder:SO5' not in exclusions  # Not assessed by this dependency traversal.
             assert len(run['paths'])==2
             assert {p['nodes'][0]['id'] for p in run['paths']}=={'SalesOrder:SO1','SalesOrder:SO2'}
             tasks=(await client.get(base+'/tasks')).json()

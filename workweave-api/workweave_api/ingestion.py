@@ -216,16 +216,22 @@ async def confirm(store: Store, job: dict, mappings: list[dict], router):
         text = json.dumps(record["raw"], ensure_ascii=False)
         job["sections"].append({"location": record["location"], "text": text, "entity_id": record["id"]})
     # Rebuild outbound dependencies from confirmed current records, including later-arriving tables.
+    dependencies, owners = [], []
     for record in await store.list("entity", 10000):
         if not record.get("active"):
             continue
-        await store.graph.query(store.name, "MATCH (n:Entity {id:$id})-[r:DEPENDS_ON|OWNED_BY]->() DELETE r", {"id": record["id"]})
         f = record["fields"]
         for field, kind in (("supplier_id", "Supplier"), ("product_id", "Product"), ("purchase_order_id", "PurchaseOrder")):
             if f.get(field):
-                await store.link(record["id"], "DEPENDS_ON", kind + ":" + f[field])
+                dependencies.append([record["id"], kind + ":" + f[field]])
         if f.get("owner"):
-            await store.link(record["id"], "OWNED_BY", "Team:" + f["owner"])
+            owners.append([record["id"], "Team:" + f["owner"]])
+    # One rebuild per import avoids a remote round trip per existing edge.
+    await store.graph.query(store.name, "MATCH (n:Entity {active:true})-[r:DEPENDS_ON|OWNED_BY]->() DELETE r")
+    for relation, links in (("DEPENDS_ON", dependencies), ("OWNED_BY", owners)):
+        if links:
+            await store.graph.query(store.name,
+                f"UNWIND $links AS link MATCH (a:Entity {{id:link[0]}}),(b:Entity {{id:link[1]}}) MERGE (a)-[:{relation}]->(b)", {"links": links})
     degraded = False
     for section in job["sections"]:
         for i, text in enumerate(chunks(section["text"])):

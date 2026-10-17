@@ -34,9 +34,10 @@ Workweave supports two connected paths:
   supplier delivery change; trace affected commitments; identify their owners;
   create internal review tasks; retain the investigation and its outcome.
 
-For example, a late shipment can affect two customer orders while three others
-remain safe because they are due later, have available stock, or use another
-shipment. The explanation should show those distinctions.
+For example, the included late-shipment scenario follows recorded dependencies
+to four customer orders. Two need review; two are excluded because of their dates
+or available stock. A fifth order is outside those paths and is not assessed.
+The explanation shows the evidence and the limits of the investigation.
 
 ## Try it in a few minutes
 
@@ -203,7 +204,11 @@ Compose profiles against different database endpoints unintentionally.
 
 ### Repeatable graph-workflow demo
 
-Create a password-based test account first, then run:
+From **Home**, click **Try the example**. Workweave creates a separate fictional
+Harbor Supply workspace and prepares its investigation in the background. The
+saved preparation job can recover after interruption. Your existing company is
+kept separate. For a command-line alternative, create a password-based account
+first, then run:
 
 ```bash
 python scripts/run-graph-demo.py --url http://localhost:8080
@@ -212,7 +217,9 @@ python scripts/run-graph-demo.py --url http://localhost:8080
 The helper prompts for your login without displaying the password and creates a
 fresh **Harbor Supply** workspace through the real API. It imports synthetic
 records, moves a purchase-order delivery date, and verifies that **SO1 and SO2**
-are affected, **SO3–SO5** are excluded, and two internal review tasks were saved.
+are affected and two internal review tasks were saved. **SO3 and SO4** are checked
+and excluded with date/stock evidence. **SO5** is outside the recorded dependency
+paths and is not assessed by this investigation.
 No chat-model key is required for this explicitly labelled deterministic graph
 scenario. It is not a fabricated model response.
 
@@ -227,9 +234,10 @@ follow its dependency path and source citations, complete a task, and revisit
 - **Deployment:** [frontend and Google setup](docs/fly-frontend.md), [backend setup](docs/fly-backend.md).
 
 The public frontend, API proxy, hostname/origin checks, and Google callback URL
-have been checked. A complete Google sign-in still needs its production URLs
-registered in Google Cloud Console. Hosted embedding service and authenticated
-cloud-model answer verification are separate from a successful health check.
+have been checked. Password sign-up, onboarding, document questions, and an
+authenticated Ollama Cloud answer were exercised in the live browser audit.
+A complete Google sign-in still needs separate consent verification. Hosted
+embedding service verification is separate from a successful health check.
 
 Uploads support CSV, XLSX, text-based PDF, DOCX, Markdown, and text, up to 10 MB per
 file. There is no OCR for scanned PDFs. Confirmed operational entity types are
@@ -249,13 +257,14 @@ support review but do not guarantee every generated claim or calculation is corr
 
 ## Verification
 
-The latest isolated backend run passed **39 tests**. Coverage includes current
-source versions, dependency exclusions, task recovery, tenant/private-history
-boundaries, scoped MCP tools, provider policies, malformed model names, and
-hostile-origin rejection. A browser test separately verified proxy sign-in,
-HttpOnly cookies, saved preferences, and a synthetic multipart document import.
-The live smoke test created no company/user records and checked public routing,
-negative authentication, origin rejection, the Google callback URL, and mobile layout.
+The latest isolated backend run passed **40 tests**. Coverage includes current
+source versions, dependency exclusions with evidence, task and interrupted-example
+recovery, tenant/private-history boundaries, scoped MCP tools, provider policies,
+malformed model names, and hostile-origin rejection. The frontend production build
+and TypeScript check passed. Browser audits use new synthetic accounts and company
+data to exercise onboarding, imports, citations, history, task outcomes, mobile
+layout, and the example investigation. See the [audit report](docs/submission-audit.md)
+for the live results and remaining gaps.
 
 For developer test instructions and the recording walkthrough, see
 [development and demo](docs/development-and-demo.md). These checks are not a

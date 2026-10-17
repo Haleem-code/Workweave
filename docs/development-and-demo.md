@@ -20,10 +20,11 @@ docker rm -f workweave-test-db
 docker network rm workweave-test-network
 ```
 
-The latest suite passed **39 tests**, covering versions, impact exclusions,
+The latest suite passed **40 tests**, covering versions, impact exclusions,
 ownership, recovery, tenant/private-history isolation, scoped MCP, provider policy,
-model-name fallback, and browser origins. Provider tests use simulated HTTP; they
-do not prove that a live cloud key or quota works.
+model-name fallback, browser origins, and interrupted-example recovery. Provider
+unit tests use simulated HTTP. The separate live browser audit verifies an actual
+Ollama Cloud answer; see [audit results](submission-audit.md).
 
 ## Frontend build
 
@@ -32,15 +33,16 @@ docker build -t workweave-web-check ./workweave-web
 ```
 
 This runs the production build and TypeScript check. A separate isolated browser
-test verified sign-in, HttpOnly cookies, saved preferences, a synthetic multipart
-document import, and hostile-origin rejection. Public smoke checks verified
-routing, negative authentication, Google callback configuration, and mobile layout;
-they did not create production companies/users or complete Google consent.
+test verified onboarding, sign-in, HttpOnly cookies, document imports, citations,
+history, mobile layout, and saved task outcomes using fictional company data.
+Google consent and hosted embeddings remain separate unverified paths.
 
 ## Prepare the demo
 
 Follow the [company-pack guide](testing/README.md) for grounded questions. To show
-the actual dependency traversal, first create a password-based test account, then:
+the actual dependency traversal, use **Home → Try the example**. Preparation runs
+as a saved background job in a separate synthetic workspace. Alternatively, create
+a password-based test account and run:
 
 ```bash
 python scripts/run-graph-demo.py --url http://localhost:8080
@@ -54,16 +56,14 @@ Use `--url https://workweave-web.fly.dev` only when intentionally creating this
 synthetic workspace in your own hosted account. That is a real write. Google-only
 accounts have no local password and cannot use this helper.
 
-## Suggested video: about three minutes
+## Video: 3 minutes 30 seconds
 
-| Time | Show | Explain |
-| --- | --- | --- |
-| 0:00–0:20 | A company workspace and its three documents | Workweave connects company knowledge and its sources. |
-| 0:20–0:55 | Answer, opened citation, then missing fact | Grounded answers should distinguish known facts from unknowns. |
-| 0:55–1:45 | Harbor Supply investigation and dependency path | SO1/SO2 need review; explain why SO3–SO5 are excluded. |
-| 1:45–2:15 | Current owner, review task, completed status | This is an internal action with recorded evidence, not a customer message. |
-| 2:15–2:40 | Refresh, History, and past decisions | Conversations, investigations, and actual outcomes persist. |
-| 2:40–3:00 | Architecture and source query | Explain FalkorDB's central role; disclose AI assistance and existing work. |
+Use the [timed recording plan](submission-recording-plan.md) and
+[narration draft](submission-video-script.md). Show onboarding, confirmed upload,
+an answer and citation, the Harbor Supply dependency investigation, exclusions,
+handoff, a task outcome, persisted memory, and the real FalkorDB query. Slack and
+ClickUp synchronization is a roadmap item; their prepared synthetic data does not
+demonstrate a live connection.
 
 Record the running behavior. A walkthrough is not the video deliverable, and a
 deterministic graph result must not be presented as a live cloud-model response.

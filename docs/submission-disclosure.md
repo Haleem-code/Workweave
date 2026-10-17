@@ -49,7 +49,7 @@ Access to a document alone does not establish permission to use it as demo data.
 | Setup instructions and graph model | README and linked guides |
 | Core Cypher queries | `docs/graph-queries.cypher`, with source references |
 | Working-project video | **Not recorded yet**, confirmed by the participant |
-| Live deployment or complete local setup | Frontend/backend live and local setup included; hosted embeddings, live model answers, and complete Google consent need separate verification |
+| Live deployment or complete local setup | Frontend/backend live and local setup included; password onboarding and an Ollama Cloud response verified in the live audit; hosted embeddings and complete Google consent remain unverified |
 | Named track | Company Brain |
 | AI assistance | Disclosed |
 | Event-window history | Prior prototype disclosed; eligibility clarification outstanding |

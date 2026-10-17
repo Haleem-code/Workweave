@@ -8,6 +8,7 @@ import { ConversationHistory, ConversationSummary, RecentActivity } from './comp
 import { api, ApiError, Company, EvidenceReference, GraphPath, Mapping, MemoryEntry, Message, Preview, Profile, ProviderSettings, RunStatus, Source, Task } from './api'
 import { Setup } from './components/Setup'
 import { AISettings } from './components/AISettings'
+import { DemoWorkspace } from './components/DemoWorkspace'
 import { workAreas, workspacePriorities } from './company-context'
 import { Welcome, WeaveMark } from './components/Welcome'
 import type { Readiness } from './api'
@@ -127,6 +128,7 @@ export default function App() {
   const focusReturn = useRef<HTMLElement | null>(null)
   const inspectorReturn = useRef<HTMLElement | null>(null)
   const apiBase = company ? '/companies/' + company.id : ''
+  const awaitingWork = Boolean(activeRunId) || runs.some(run => run.status === 'queued' || run.status === 'running')
 
   const perform = async (action: () => Promise<void>) => {
     setBusy(true)
@@ -218,9 +220,9 @@ export default function App() {
       if (document.hidden || refreshing) return
       refreshing = true
       try { await refresh() } catch (e) { setError((e as Error).message) } finally { refreshing = false }
-    }, activeRunId ? 15000 : 60000)
+    }, awaitingWork ? 2500 : 60000)
     return () => clearInterval(timer)
-  }, [company, refresh, activeRunId])
+  }, [company, refresh, awaitingWork])
 
   // A saved run is authoritative. A dropped event stream must never leave the
   // composer disabled or hide an answer already stored by the backend.
@@ -601,10 +603,15 @@ export default function App() {
               </div>
             </div>
 
-            <RecentActivity key={company.id} runs={runs} onHistory={() => { void openHistory() }} onOpen={run => {
+            <RecentActivity key={'recent-' + company.id} runs={runs} onHistory={() => { void openHistory() }} onOpen={run => {
               if (run.entity_id) perform(async () => setSelected(await api<RunStatus>(apiBase + '/runs/' + run.id)))
               else void openConversation(run.conversation_id)
             }} />
+
+            {!runs.some(run => run.demo) && <DemoWorkspace key={'demo-' + company.id} onReady={async next => {
+              const items = await api<Company[]>('/companies')
+              setCompanies(items); switchScreen('Work'); changeWorkspace(next)
+            }} />}
 
             <section className="panel">
               <div className="panel-heading">
@@ -612,7 +619,7 @@ export default function App() {
                   <h2>Internal review tasks</h2>
                   <p>Created from findings. Progress is retained in memory.</p>
                 </div>
-                <span className="pill">{tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}</span>
+                <button className="text-button" onClick={() => switchScreen('Memory')}><BookOpen size={15} />View remembered outcomes</button>
               </div>
               {tasks.length ? (
                 tasks.map((t, i) => (
@@ -1367,6 +1374,14 @@ function Inspector({
         {!run.findings.length && <p className="muted small">No affected commitments recorded.</p>}
       </section>
 
+      {run.impact_review && <section className="impact-review">
+        <h3>Why other orders do not need review</h3>
+        <p className="small muted">{run.impact_review.candidate_count} orders checked along recorded dependency paths.</p>
+        {run.impact_review.excluded.map(item => <article className="excluded-order" key={item.entity_id}><strong>{item.title}</strong><p className="small">{item.reason}</p><Citations ids={item.evidence_ids} onClick={onEvidence} /></article>)}
+        {!run.impact_review.excluded.length && <p className="small muted">{run.impact_review.candidate_count ? 'Every assessed order needs attention.' : 'No current dependency paths were found. This does not establish that other orders are unaffected.'}</p>}
+        <p className="small muted">{run.impact_review.assumption}</p>
+      </section>}
+
       {finding && (
         <section>
           <h3>Why this needs attention</h3>
@@ -1400,6 +1415,7 @@ function Inspector({
 
       <section>
         <h3>Execution audit trail</h3>
+        {run.handoff && <p className="small"><strong>{run.handoff.from} → {run.handoff.to}</strong><br />{run.handoff.finding_ids.length} findings handed over · {stamp(run.handoff.at)}</p>}
         <div className="timeline">
           {(run.events || [])
             .filter(e => !e.type.startsWith('message.'))

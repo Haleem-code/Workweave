@@ -72,7 +72,7 @@ class Tools:
         """, {"id": entity_id})
         sources = {s["id"]: s for s in await self.store.list("source", 10000) if not s.get("is_version")}
         chunks = await self.store.list("chunk", 10000)
-        findings, paths, seen, stock_left = [], [], set(), {}
+        findings, paths, excluded, seen, stock_left = [], [], [], set(), {}
         for row in rows:
             order, po = json.loads(row["order_json"]), json.loads(row["po_json"])
             product = json.loads(row["product_json"]) if row["product_json"] else None
@@ -80,11 +80,13 @@ class Tools:
             if order["id"] in seen or any(not sources.get(r["source_id"], {}).get("active") or not sources[r["source_id"]].get("import_complete") or sources[r["source_id"]]["version"] != r["version"] for r in records):
                 continue
             seen.add(order["id"])
+            evidence = [c["id"] for c in chunks if c.get("entity_id") in {r["id"] for r in records} and c.get("active") and sources.get(c["source_id"], {}).get("version") == c["version"]]
             of, pf = order["fields"], po["fields"]
             required, delivery = of.get("required_date"), pf.get("delivery_date")
             if not required or not delivery:
                 explanation, severity = "Delivery or required date is missing; impact needs review.", "needs_review"
             elif date.fromisoformat(delivery) <= date.fromisoformat(required):
+                excluded.append({"entity_id": order["id"], "title": order["name"], "reason": f"Supply arrives {delivery}, on or before the required date {required}.", "evidence_ids": evidence})
                 continue
             else:
                 quantity = of.get("quantity")
@@ -95,10 +97,10 @@ class Tools:
                     available = stock_left.setdefault(product["id"], stock)
                     stock_left[product["id"]] = max(0, available - quantity)
                     if available >= quantity:
+                        excluded.append({"entity_id": order["id"], "title": order["name"], "reason": f"{available:g} unallocated units cover {quantity:g} required units despite the later delivery.", "evidence_ids": evidence})
                         continue
                     explanation = f"Supply arrives {delivery}, after the required date {required}; {available:g} unallocated units cannot cover {quantity:g} required units."
                     severity = "affected"
-            evidence = [c["id"] for c in chunks if c.get("entity_id") in {r["id"] for r in records} and c.get("active") and sources.get(c["source_id"], {}).get("version") == c["version"]]
             owner = await self.find_owner(order["id"])
             finding = {"id": "finding_" + hashlib.sha256((self.run_id + order["id"]).encode()).hexdigest()[:20],
                        "entity_id": order["id"], "title": "Review " + order["name"], "explanation": explanation,
@@ -106,12 +108,14 @@ class Tools:
             findings.append(finding)
             paths.append({"nodes": [{"id": x, "label": x.split(":", 1)[-1], "type": x.split(":", 1)[0]} for x in row["path_ids"]],
                           "edges": [{"source": a, "target": b, "label": "DEPENDS_ON"} for a, b in zip(row["path_ids"], row["path_ids"][1:])]})
+        review = {"candidate_count": len(seen), "excluded": excluded, "assumption": "Stock means currently unallocated units, allocated to delayed commitments in required-date order. Orders outside the recorded dependency paths are not assessed."}
         run = await self.store.get("run", self.run_id)
         if run:
             run["findings"] = findings
             run["paths"] = paths
+            run["impact_review"] = review
             await self.store.put("run", run)
-        return {"findings": findings, "paths": paths, "candidate_count": len(seen), "assumption": "Stock means currently unallocated units, allocated to delayed commitments in required-date order."}
+        return {"findings": findings, "paths": paths, **review}
 
     async def create_review_task(self, finding_id: str):
         run = await self.store.get("run", self.run_id)

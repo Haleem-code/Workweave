@@ -59,6 +59,10 @@ automatically create a typed operational dependency graph.
 
 To test the operational traversal, use the separate **Harbor Supply** scenario:
 
+Open **Home → Try the example** to prepare it in a new workspace. The background
+job saves its progress and can recover after interruption. The command-line
+alternative is:
+
 ```bash
 python scripts/run-graph-demo.py --url http://localhost:8080
 ```
@@ -66,7 +70,8 @@ python scripts/run-graph-demo.py --url http://localhost:8080
 Create an email/username account first. The script prompts for that account's
 password without displaying it, creates a fresh synthetic workspace, imports
 the supplied tables, and changes a delivery date. It verifies SO1/SO2 as affected
-and two saved review tasks. It signs its own API session out afterward; the
+and two saved review tasks. SO3/SO4 have explicit date/stock exclusions; SO5 is
+outside the assessed dependency paths. It signs its own API session out afterward; the
 workspace stays available in the browser. A Google-only account has no password
 for this helper; use a separate password-based test account.
 

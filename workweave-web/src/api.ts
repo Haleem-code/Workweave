@@ -1,7 +1,7 @@
 export type EvidenceReference = { id: string; title: string; source_id: string; location: string; version: string; excerpt: string; current?: boolean }
 export type Finding = { id: string; title: string; explanation: string; entity_id: string; owner: string; severity: string; evidence_ids: string[] }
 export type GraphPath = { nodes: { id: string; label: string; type: string }[]; edges: { source: string; target: string; label: string }[] }
-export type RunStatus = { id: string; query: string; entity_id?: string; status: 'queued'|'running'|'blocked'|'completed'; checkpoint: string; findings: Finding[]; paths: GraphPath[]; evidence_ids?: string[]; answer?: string; error?: string; provider?: string; demo?: boolean; conversation_id: string; created_at: number; events?: { type: string; data: Record<string, unknown>; at: number }[] }
+export type RunStatus = { id: string; query: string; entity_id?: string; status: 'queued'|'running'|'blocked'|'completed'; checkpoint: string; findings: Finding[]; paths: GraphPath[]; evidence_ids?: string[]; answer?: string; error?: string; provider?: string; demo?: boolean; conversation_id: string; created_at: number; impact_review?: { candidate_count: number; excluded: { entity_id: string; title: string; reason: string; evidence_ids: string[] }[]; assumption: string }; handoff?: { from: string; to: string; at: number; finding_ids: string[] }; events?: { type: string; data: Record<string, unknown>; at: number }[] }
 export type Task = { id: string; title: string; owner: string; status: string; run_id: string; description?: string; evidence_ids: string[] }
 export type MemoryEntry = { id: string; summary: string; outcome: string; evidence_ids: string[]; created_at: number }
 export type Company = { id: string; name: string }

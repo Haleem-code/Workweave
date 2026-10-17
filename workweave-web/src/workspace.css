@@ -739,3 +739,10 @@ blockquote {padding:15px 18px; background:var(--surface-container-low); border-l
 .provider-row .muted {overflow-wrap:anywhere}
 @media(max-width:1000px) {.ai-processing-options {grid-template-columns:1fr}.ai-processing-option {padding:16px}.ai-processing-option span {gap:4px}}
 @media(prefers-reduced-motion:reduce) {.ai-processing-option {transition:none}}
+
+.example-workspace {display:flex;align-items:center;gap:24px;padding:26px;margin:24px 0;border:1px solid var(--outline-variant);border-radius:14px;background:var(--surface-container-low)}
+.example-workspace>div {flex:1;min-width:0}.example-workspace h2 {font-size:20px;margin:8px 0 10px;line-height:1.3}
+.example-workspace p {font-size:14px;line-height:1.6;margin:0 0 8px}.example-workspace small {display:block;font-size:12px;line-height:1.6;color:var(--on-surface-variant)}
+.example-icon {color:var(--primary);flex:none}.example-workspace>button {flex:none}
+.excluded-order {border-left:2px solid var(--primary);padding:10px 0 10px 14px;margin:16px 0}.excluded-order>strong {font-size:14px}
+@media(max-width:850px) {.example-workspace {align-items:flex-start;flex-wrap:wrap;gap:16px}.example-workspace>div {flex-basis:calc(100% - 44px)}.example-workspace>button {margin-left:40px}.example-workspace h2 {font-size:18px}}
