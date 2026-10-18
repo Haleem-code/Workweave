@@ -338,7 +338,7 @@ The repository includes setup instructions, the graph model, core queries, four 
 
 **AI assistance and my contribution:** OpenAI Codex assisted with coding, bug fixes, testing, deployment, documentation, and demo video preparation. I directed the product, developed the company scenarios, and reviewed the results. The video uses synthetic narration (Microsoft Sonia through Edge TTS). I reviewed and tested the implementation and can explain its architecture, graph model, and technical decisions.
 
-**Build history:** earlier documentation described a pre-event prototype. That disclosure is preserved in [submission history](docs/submission-disclosure.md); this README does not assert that all implementation began during the event or that eligibility has been confirmed. The [organizer's rules](https://www.wemakedevs.org/hackathons/falkordb/rules) govern eligibility.
+**Build history:** I started building Workweave on **October 15, 2026**, the opening day of Graph Hacks. Earlier conflicting dates in the documentation have been corrected in the [submission disclosure](docs/submission-disclosure.md). The [organizer's rules](https://www.wemakedevs.org/hackathons/falkordb/rules) govern eligibility.
 
 ## Explore the implementation
 

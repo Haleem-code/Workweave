@@ -1,28 +1,79 @@
 ---
 title: "Workweave: an AI company brain that turns information into useful work"
-description: "How Workweave uses FalkorDB to connect company documents, remember outcomes, and turn Slack requests into reviewed ClickUp tasks."
+description: "A changed date, two affected commitments, and a remembered outcome: how Workweave uses FalkorDB to connect company knowledge to useful work."
 tags: falkordb, ai, hackathon, webdev
 published: false
 ---
 
-## What if your company information could help your team decide what to do next?
+## A delivery date changed. Which promises now need attention?
 
-Most companies already have useful information. Some is in documents, some is in spreadsheets, and some is in Slack messages. The hard part is connecting it.
+In the fictional Harbor Supply workspace, a supplier's arrival moves to October 23. Acme needs 10 cartons by October 19, with only 2 unallocated units available. Beacon needs 8 by October 20, with none available.
 
-Someone asks a question. A manager looks for the right document. Another person checks who owns the work. Someone else creates a task. Later, the team has to remember why that task was created and what happened to it.
+Workweave follows the recorded dependencies, identifies those two commitments for review, finds their responsible team, and creates two internal review tasks. It also explains why two other checked orders do not need review. Later, when the Beacon task is marked done, that outcome remains in memory alongside the original findings.
 
-I built **Workweave** to bring these steps together.
+That is the workflow I wanted to build: **follow a change, explain what it affects, record the next step, and remember the outcome.**
 
-Workweave helps teams ask questions about their company, check the source behind an answer, find the people responsible, and keep a record of the next step and its outcome. It uses **FalkorDB** to store the information and the connections between it.
+**Workweave is a company knowledge and work assistant powered by FalkorDB.** Teams can upload their own documents, ask questions with sources, and review work suggestions against confirmed responsibilities. Logistics is the clearest operational example in the demo; fictional energy, food production, and software packs also test the company knowledge features.
 
-It is designed for company knowledge across industries. Logistics is one example in the demo. The repository also includes fictional energy, food production, and software companies.
+**[Try the app](https://workweave-web.fly.dev) · [Source code](https://github.com/Haleem-code/Workweave) · [Watch the 3:50 demo](https://youtu.be/3Rfimah_TUQ)**
 
-**[Try Workweave](https://workweave-web.fly.dev) · [Source code](https://github.com/Haleem-code/Workweave) · [Watch the 3:50 demo](https://youtu.be/3Rfimah_TUQ)**
+**Tracks:** Company Brain · Agent Memory and Coordination · Agents That Act on Connected Data.
 
-[![Watch the Workweave demo](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/demo-poster.jpg)](https://youtu.be/3Rfimah_TUQ)
+The demo shows the internal graph workflow and saved outcome. Slack and ClickUp extend the design with human-approved external work; live recording and test coverage are distinguished in the verification section below.
 
-<!-- DEV Community: this tag embeds the video when you publish the article. -->
 {% embed https://www.youtube.com/watch?v=3Rfimah_TUQ %}
+
+## Why searching documents is not enough
+
+A search can find the supplier's revised arrival date. It still leaves the team to connect that date to purchase orders, customer commitments, available stock, and the people responsible.
+
+Workweave stores those supported relationships in FalkorDB. A traversal finds orders connected to the changed record and returns the paths. Application checks then compare dates and quantities. Search remains useful for company questions and source passages; graph traversal handles questions that depend on connections across records.
+
+The difference matters in this example: two orders share a dependency but do not need review because their dates or stock cover them. Being connected is a reason to check, not proof of a problem.
+
+## The working example: which commitments need attention?
+
+The delivery example makes the relationships easy to see. A supplier shipment changes date. Workweave follows the connected purchase order to customer commitments, then checks deadlines and stock.
+
+Two orders need attention. Two other connected orders are excluded for clear reasons. An unrelated order is outside the investigation's paths.
+
+This is one implemented operational workflow. Company document questions and role-based task routing are broader features. Deeper checks for other industries need the right structured data and supported relationships; choosing an industry during onboarding does not create all those rules automatically.
+
+### The Cypher behind the result
+
+This is the dependency query used by the investigation tool. The application resolves the requested record against current source evidence before binding its ID to `$id`.
+
+```cypher
+MATCH path=(o:Entity {entity_type:'SalesOrder',active:true})
+  -[:DEPENDS_ON*1..4]->(target:Entity {id:$id,active:true})
+WHERE all(n IN nodes(path) WHERE n.active=true)
+MATCH (o)-[:DEPENDS_ON]->(po:Entity {entity_type:'PurchaseOrder',active:true})
+OPTIONAL MATCH (o)-[:DEPENDS_ON]->(product:Entity {entity_type:'Product',active:true})
+RETURN DISTINCT o.payload AS order_json, po.payload AS po_json,
+  product.payload AS product_json,
+  [n IN nodes(path) | n.id] AS path_ids
+ORDER BY o.required_date
+```
+
+In plain English, it finds active sales orders that depend on the changed record through one to four recorded connections. It also returns the purchase-order data, any linked product data, and the IDs along each path. Those IDs let the interface show how a commitment is connected to the change.
+
+The query finds candidates. Python then checks current source versions, required dates, delivery dates, quantities, and unallocated stock. A connected order is not automatically an affected order. The four-hop limit also means this is a bounded investigation, not a claim to inspect every possible dependency at any depth.
+
+[Inspect the query and business checks in `trace_impact`](https://github.com/Haleem-code/Workweave/blob/main/workweave-api/workweave_api/tools.py).
+
+### From a changed date to a remembered outcome
+
+**Before the investigation:** the supplier's arrival date has moved to October 23. That date alone does not tell a team which customers need attention.
+
+**After following the graph:** Workweave identifies two commitments needing review and creates two internal tasks for Customer Success. The Acme order needs 10 units by October 19, but only 2 unallocated units are available. Beacon needs 8 units by October 20, with none available. Other checked orders are excluded when their dates or stock cover them; an unrelated order is outside the investigated paths.
+
+![Workweave investigation showing the changed supplier date, two affected commitments, Customer Success ownership, and two open internal review tasks.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/blog-impact-review.png)
+
+**After someone acts:** the demo marks the Beacon review task done. The memory page then shows Beacon as done and Acme as open, alongside the original findings, source buttons, and current procedure. The next session can return to that recorded outcome.
+
+![Workweave memory showing the saved supplier-delay findings, Beacon review marked done, Acme review still open, source links, and the approved procedure.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/blog-saved-outcome.png)
+
+These are screenshots from the synthetic Harbor Supply demo. Its investigation is deterministic and uses the implemented graph tools. Marking a review task done records the user's update; it does not prove that a delivery arrived or a customer was contacted. These internal tasks are separate from the ClickUp workflow described earlier.
 
 ## First, tell Workweave about your company
 
@@ -46,9 +97,9 @@ If the documents do not contain the answer, the app should say so. For example, 
 
 Documents can change. Workweave keeps source versions and filters out old or withdrawn evidence when preparing current answers.
 
-## How Slack connects to Workweave
+## The next input: a request from Slack
 
-An administrator connects a Slack app using its bot token and Signing Secret. These are entered privately in **Connections**, not added to GitHub.
+The same need for ownership and a recorded next step also appears in chat. A Slack request can enter a separate task-proposal workflow. An administrator connects a Slack app using its bot token and Signing Secret. These are entered privately in **Connections**, not added to GitHub.
 
 Workweave gives the administrator a public HTTPS address for Slack events. They add it to Slack's Event Subscriptions, give the app the required permissions, invite the bot, and choose which channels Workweave should watch.
 
@@ -160,50 +211,6 @@ The ClickUp worker also periodically checks task updates. Those recorded outcome
 
 Company workspaces have separate knowledge graphs. Access checks also control which company and private conversation a user can read.
 
-## Why the demo includes a delivery delay
-
-The delivery example makes the relationships easy to see. A supplier shipment changes date. Workweave follows the connected purchase order to customer commitments, then checks deadlines and stock.
-
-Two orders need attention. Two other connected orders are excluded for clear reasons. An unrelated order is outside the investigation's paths.
-
-This is one implemented operational workflow. Company document questions and role-based task routing are broader features. Deeper checks for other industries need the right structured data and supported relationships; choosing an industry during onboarding does not create all those rules automatically.
-
-### The Cypher behind the result
-
-This is the dependency query used by the investigation tool. The application resolves the requested record against current source evidence before binding its ID to `$id`.
-
-```cypher
-MATCH path=(o:Entity {entity_type:'SalesOrder',active:true})
-  -[:DEPENDS_ON*1..4]->(target:Entity {id:$id,active:true})
-WHERE all(n IN nodes(path) WHERE n.active=true)
-MATCH (o)-[:DEPENDS_ON]->(po:Entity {entity_type:'PurchaseOrder',active:true})
-OPTIONAL MATCH (o)-[:DEPENDS_ON]->(product:Entity {entity_type:'Product',active:true})
-RETURN DISTINCT o.payload AS order_json, po.payload AS po_json,
-  product.payload AS product_json,
-  [n IN nodes(path) | n.id] AS path_ids
-ORDER BY o.required_date
-```
-
-In plain English, it finds active sales orders that depend on the changed record through one to four recorded connections. It also returns the purchase-order data, any linked product data, and the IDs along each path. Those IDs let the interface show how a commitment is connected to the change.
-
-The query finds candidates. Python then checks current source versions, required dates, delivery dates, quantities, and unallocated stock. A connected order is not automatically an affected order. The four-hop limit also means this is a bounded investigation, not a claim to inspect every possible dependency at any depth.
-
-[Inspect the query and business checks in `trace_impact`](https://github.com/Haleem-code/Workweave/blob/main/workweave-api/workweave_api/tools.py).
-
-### From a changed date to a remembered outcome
-
-**Before the investigation:** the supplier's arrival date has moved to October 23. That date alone does not tell a team which customers need attention.
-
-**After following the graph:** Workweave identifies two commitments needing review and creates two internal tasks for Customer Success. The Acme order needs 10 units by October 19, but only 2 unallocated units are available. Beacon needs 8 units by October 20, with none available. Other checked orders are excluded when their dates or stock cover them; an unrelated order is outside the investigated paths.
-
-![Workweave investigation showing the changed supplier date, two affected commitments, Customer Success ownership, and two open internal review tasks.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/blog-impact-review.png)
-
-**After someone acts:** the demo marks the Beacon review task done. The memory page then shows Beacon as done and Acme as open, alongside the original findings, source buttons, and current procedure. The next session can return to that recorded outcome.
-
-![Workweave memory showing the saved supplier-delay findings, Beacon review marked done, Acme review still open, source links, and the approved procedure.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/blog-saved-outcome.png)
-
-These are screenshots from the synthetic Harbor Supply demo. Its investigation is deterministic and uses the implemented graph tools. Marking a review task done records the user's update; it does not prove that a delivery arrived or a customer was contacted. These internal tasks are separate from the ClickUp workflow described earlier.
-
 ## A simple view of the architecture
 
 ![Workweave architecture: company documents, FalkorDB memory, and the Slack-to-reviewed-ClickUp workflow.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/workweave-architecture.png)
@@ -241,6 +248,6 @@ The named tracks are **Company Brain**, **Agent Memory and Coordination**, and *
 
 OpenAI Codex and GitHub Copilot assisted with development. Codex also assisted with testing, deployment, documentation, and demo video preparation. I directed the product, developed the company scenarios, and reviewed the results. The video uses synthetic narration. I reviewed and tested the implementation and can explain its architecture, graph model, and technical decisions.
 
-Earlier documentation described pre-event prototype work. That history is preserved in the [submission disclosure](https://github.com/Haleem-code/Workweave/blob/main/docs/submission-disclosure.md); this article does not claim that the entire implementation began during the event or that eligibility has been confirmed.
+I started building Workweave on **October 15, 2026**, the opening day of Graph Hacks. Earlier conflicting dates in the documentation have been corrected in the [submission disclosure](https://github.com/Haleem-code/Workweave/blob/main/docs/submission-disclosure.md).
 
 **[Open Workweave](https://workweave-web.fly.dev) · [Watch the demo](https://youtu.be/3Rfimah_TUQ) · [View the code](https://github.com/Haleem-code/Workweave)**

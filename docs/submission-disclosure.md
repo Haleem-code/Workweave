@@ -8,25 +8,17 @@ completed live Slack-to-ClickUp dispatch or high-throughput autonomous agents.
 
 ## Build history
 
-The prior README described a pre-event prototype built **October 10, 2026** and
-reliability/interface work on **October 14**. It already described graph storage,
-retrieval, versioned evidence, MCP tools, investigations, tasks, and memory.
-This document preserves that previously disclosed history; it is not independent
-verification of the dates or a replacement for source history.
+I started building Workweave on **October 15, 2026**, the opening day of Graph Hacks.
+Earlier documentation gave conflicting pre-event dates; that wording was
+incorrect and is superseded by this correction. Repository creation dates
+are separate from the date development began.
 
 Observed event-period updates include onboarding/settings improvements, the
 Ollama Cloud adapter and validation, production deployment, frontend/backend
 proxy integration, Slack/ClickUp event-and-approval integration, graph assignment,
 durable delivery/recovery fixes, tests, video preparation, and documentation.
-These updates do not establish that
-the main FalkorDB implementation was created during the event.
-
-The [rules](https://www.wemakedevs.org/hackathons/falkordb/rules) require main
-coding/design work to begin during the event. The
-[FAQ](https://www.wemakedevs.org/hackathons/falkordb) also requires the submission
-and main FalkorDB implementation to be new event work. The participant should
-resolve this existing-work question with the organizers and accurately identify
-what was built when. Eligibility confirmation is not claimed.
+The [organizer's rules](https://www.wemakedevs.org/hackathons/falkordb/rules)
+govern submission eligibility.
 
 ## AI assistance and authorship
 
@@ -57,11 +49,11 @@ Access to a document alone does not establish permission to use it as demo data.
 | Live deployment or complete local setup | Frontend/backend live and local setup included; password onboarding and an Ollama Cloud response verified in the live audit; hosted embeddings and complete Google consent remain unverified |
 | Named tracks | Company Brain; Agent Memory and Coordination; Agents That Act on Connected Data |
 | AI assistance | Disclosed |
-| Event-window history | Prior prototype disclosed; eligibility clarification outstanding |
+| Project start | October 15, 2026, the opening day of Graph Hacks |
 
 The latest full backend run passed 57 tests with real disposable FalkorDB and
 controlled external API responses. The production frontend build and TypeScript
 check passed. This is not a claim of a completed live Slack-to-ClickUp dispatch.
 
 Before submitting, push the current source and `docs/media` assets, verify the
-public video link, review the code, and resolve the build-history question.
+public video link, and review the code.
