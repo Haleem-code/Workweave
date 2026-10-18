@@ -1,188 +1,190 @@
 ---
-title: "Workweave: connecting company knowledge to accountable work with FalkorDB"
-description: "A company brain with source-backed answers, graph investigations, persistent memory, and reviewed Slack-to-ClickUp actions."
+title: "Workweave: an AI company brain that turns information into useful work"
+description: "How Workweave uses FalkorDB to connect company documents, remember outcomes, and turn Slack requests into reviewed ClickUp tasks."
 tags: falkordb, ai, hackathon, webdev
 published: false
 ---
 
-# A late shipment is a fact. Knowing which promises it affects is the useful part.
+# What if your company information could help your team decide what to do next?
 
-A delivery procedure explains what should happen when an order is delayed. A spreadsheet holds the customer commitments. A team guide says who is responsible. A conversation may explain what changed.
+Most companies already have useful information. Some is in documents, some is in spreadsheets, and some is in Slack messages. The hard part is connecting it.
 
-The company already has much of the information. Its employees still have to reconstruct the connections before they can decide what to do.
+Someone asks a question. A manager looks for the right document. Another person checks who owns the work. Someone else creates a task. Later, the team has to remember why that task was created and what happened to it.
 
-I built **Workweave** around that problem: company knowledge should help people understand a change, review the next step, and remember the outcome.
+I built **Workweave** to bring these steps together.
 
-**[Try the live app](https://workweave-web.fly.dev) · [Explore the source](https://github.com/Haleem-code/Workweave) · [Watch the complete 3:50 demo](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4)**
+Workweave helps teams ask questions about their company, check the source behind an answer, find the people responsible, and keep a record of the next step and its outcome. It uses **FalkorDB** to store the information and the connections between it.
 
-[![Watch the Workweave demo](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/demo-poster.jpg)](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4)
+It is designed for company knowledge across industries. Logistics is one example in the demo. The repository also includes fictional energy, food production, and software companies.
 
-The video is a walkthrough of the running application, with synthetic narration and captions. Its Slack account authentication is real. Channel permissions remain pending in the recording, and ClickUp is shown at setup. The article distinguishes those live results from automated tests throughout.
+**[Try Workweave](https://workweave-web.fly.dev) · [Source code](https://github.com/Haleem-code/Workweave) · [Watch the 3:50 demo](https://youtu.be/3Rfimah_TUQ)**
 
-## Start with a company, not a database schema
+[![Watch the Workweave demo](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/demo-poster.jpg)](https://youtu.be/3Rfimah_TUQ)
 
-Workweave begins with a short onboarding flow: what kind of company this is, what the team needs help with, and what to call the workspace. A logistics company can start with delivery procedures and responsibilities. A software company can start with projects and operating guides.
+<!-- DEV Community: this tag embeds the video when you publish the article. -->
+{% embed https://www.youtube.com/watch?v=3Rfimah_TUQ %}
 
-These choices personalize the guidance. They do not invent a company's organization or turn the interface into an entirely different product.
+## First, tell Workweave about your company
 
-Next, the user uploads a supported document or spreadsheet. Workweave shows the parsed content and proposed mappings before asking for confirmation. Accepted information becomes versioned evidence in FalkorDB.
+A new user chooses the company's work area, what they want help with, and a workspace name. These choices help the app show useful starting guidance.
 
-This review step matters. A document can contain a person's name without defining their responsibility. A column can look like an identifier without establishing a dependency. The application needs a clear boundary between a suggestion and accepted company knowledge.
+The user can then upload a company profile, a procedure, a report, or a supported spreadsheet. Workweave shows a preview before saving the information as company knowledge.
 
-## The question that made the graph necessary
+People and responsibilities found in documents are suggestions. An administrator reviews them before relying on them. A person mentioned in a document does not automatically get an account or permission to use the app.
 
-The operational example uses **Harbor Supply**, a fictional distributor. A supplier shipment that was expected on October 16 moves to October 23.
+For example, a company guide might say that Ada handles billing issues. The administrator can confirm that role and connect Ada to her ClickUp user account in **Team Roster**.
 
-The useful question is: **which customer commitments now need attention, and why?**
+## How a company question gets answered
 
-Workweave follows recorded dependencies from customer orders to the affected purchase order. It then checks required dates, quantities, available stock, and current evidence.
+A user might ask:
 
-The result deliberately contains different outcomes:
+> Who handles billing issues, and what is our approval process?
 
-| Order | Result |
-| --- | --- |
-| Acme cartons | Needs review: the commitment precedes the delayed arrival and stock is insufficient |
-| Beacon cartons | Needs review: its commitment also precedes the delayed arrival |
-| Later cartons | Excluded: its required date is later |
-| Tape with stock | Excluded: unallocated stock covers the order |
-| Unrelated tools | Outside the traversed dependency paths; not assessed |
+Workweave looks through the company's current information, finds relevant evidence, and uses that evidence to prepare an answer. The user can open a source button to check the original passage.
 
-That last distinction matters. An order outside the query's scope is not a proven safe order. Likewise, a connected order is not automatically an affected order. Connectivity gives us candidates; the business checks establish the finding.
+If the documents do not contain the answer, the app should say so. For example, knowing the Managing Director's name does not tell us who founded the company.
 
-## What FalkorDB actually does
+Documents can change. Workweave keeps source versions and filters out old or withdrawn evidence when preparing current answers.
 
-FalkorDB is the primary store for company knowledge and workflow state. It holds source versions, evidence chunks, accepted records, people, conversations, investigations, tasks, and remembered outcomes.
+## How Slack connects to Workweave
 
-The operational relationships include:
+An administrator connects a Slack app using its bot token and Signing Secret. These are entered privately in **Connections**, not added to GitHub.
 
-```text
-Customer order ──DEPENDS_ON──▶ Purchase order ──DEPENDS_ON──▶ Supplier
-      │
-      ├──OWNED_BY──▶ Responsible team
-      └──SUPPORTED_BY──▶ Source version
-```
+Workweave gives the administrator a public HTTPS address for Slack events. They add it to Slack's Event Subscriptions, give the app the required permissions, invite the bot, and choose which channels Workweave should watch.
 
-Here is the core shape of the bounded traversal:
+Only selected channels are used. Selecting no channels means no messages are monitored.
 
-```cypher
-MATCH path=(o:Entity {entity_type:'SalesOrder',active:true})
-  -[:DEPENDS_ON*1..4]->(target:Entity {id:$id,active:true})
-WHERE all(n IN nodes(path) WHERE n.active=true)
-RETURN DISTINCT o.payload AS order_json,
-  [n IN nodes(path) | n.id] AS path_ids
-```
+When Slack sends a message, Workweave checks that it came from the configured app/workspace and has a valid signature. It saves the accepted event in the company's FalkorDB graph before acknowledging it. Reading the author's name and asking the AI to review the message happen afterward.
 
-The complete implementation also joins the purchase-order and product records needed for the date and stock checks. The returned node IDs expose the actual route through the graph. They are not an explanation assembled from invented connections.
+This keeps slower AI work out of the first response to Slack. It also gives the app a saved event to continue processing after an interruption.
 
-The model does not write arbitrary Cypher. Reviewed tools use fixed, parameterized queries, with validated arguments and company/user/run boundaries. A private MCP catalogue exposes retrieval, impact tracing, ownership, procedures, memory, and eligible internal task creation.
+## How the AI decides whether a message needs a task
 
-Removing FalkorDB removes these paths, evidence retrieval, persisted jobs, and memory. It is not an optional visualization layer over a separate business database.
+Imagine someone posts this in a selected company channel:
 
-## An answer should carry its evidence
+> Please fix the billing export. The invoice totals are wrong.
 
-For company questions, Workweave retrieves current evidence before answering. Retrieval combines exact and full-text matching, optional semantic search, and graph context. Revoked, inactive, incomplete, or superseded evidence is filtered.
+The AI checks whether the message asks for work. A greeting or a thank-you message should not become a task.
 
-The interface lets the user open the source behind a claim. In the KoraBridge example, the documents explain the company and identify responsibilities. They do not necessarily identify the founder. Workweave should say that the fact is missing rather than infer that the Managing Director must be the founder.
+For a work request, the AI prepares a draft title, description, useful matching words, and any deadline mentioned in the message. It does not get permission to create an external task at this stage.
 
-Citations make an answer reviewable. They do not make every model-generated statement infallible. Keeping the source visible gives the person using the system a practical way to challenge the answer.
+If AI extraction is unavailable, the app can leave the request for manual review instead of pretending that the AI completed the decision.
 
-## Memory means preserving what happened
+## How Workweave finds someone who can do the work
 
-A useful company assistant must carry more than a transcript into the next session.
+The AI does not choose from a list of random names. Workweave first asks FalkorDB for suitable people based on the company's confirmed information.
 
-Workweave stores accepted facts and relationships as semantic context, investigations and outcomes as episodic context, and approved versioned procedures as procedural context. Conversation history, task state, and investigation checkpoints persist in the company graph.
-
-In the Harbor Supply workflow, the investigator saves findings and a handoff to the response coordinator. The coordinator creates internal review tasks. Completing a task updates its remembered outcome. Refreshing the application does not erase the investigation or the work already recorded.
-
-These are bounded application roles and persisted handoffs. I am not claiming a distributed fleet of autonomous agents or benchmarked high-concurrency coordination.
-
-## Bringing Slack requests into reviewed work
-
-Documents are useful context, but new work often begins in a message. Workweave therefore also implements a Slack-to-ClickUp pipeline:
+The graph stores connections such as:
 
 ```text
-Selected Slack channel
-        ↓
-Verify signed event → Persist in company graph → Acknowledge
-        ↓
-Background triage + graph-supported candidate selection
-        ↓
-Task Inbox: administrator reviews or edits the proposal
-        ↓
-Approved outbox job → ClickUp task → Slack confirmation
-        ↓
-Recorded task outcome becomes future context
+Person → Role → Responsibility
+Past task → Assigned person
+Person → Supporting document
 ```
 
-An administrator connects the Slack app, configures its public HTTPS event callback, and selects the channels to watch. No selected channels means no message intake. Credentials are stored separately from company knowledge in an encrypted backend vault.
+For the billing example, a confirmed person responsible for billing exports is a better match than someone whose role is warehouse dispatch.
 
-When an eligible signed message arrives, the application persists it before acknowledgement. Slow author lookup and AI triage happen afterward. Slack retries are deduplicated using a company-scoped event identifier.
+The app considers:
 
-The assignment graph has its own concrete relationships:
+- How well the person's role and responsibilities match the request.
+- Similar tasks recorded as completed on time.
+- Relevant tasks recorded as late or reassigned.
+- How much open work is already recorded for that person.
+
+People must be active, confirmed, and mapped to a ClickUp user before they can be automatic assignment candidates. Attached document evidence must still be current.
+
+FalkorDB finds the connected records and returns real graph paths. Application code calculates a clear fit score from those results. When available, the AI can review the top three candidates and choose only from those supplied people. It cannot invent a new employee.
+
+This is a practical matching rule, not a promise that the AI always knows the best person. The administrator can inspect the reasons and change the choice.
+
+## How the ClickUp task gets created
+
+ClickUp is connected separately using a personal API token and a destination **List ID**. The List ID tells Workweave where approved tasks should go.
+
+The proposed task first appears in **Task Inbox**. The administrator can review:
+
+1. The original Slack request.
+2. The proposed task title and description.
+3. The suggested person and other candidates.
+4. The matching factors, recorded paths, and available document evidence.
+
+The administrator can edit the draft or change the assignee. Only after they choose **Approve & Create in ClickUp** does the worker send the task to ClickUp.
+
+Once creation is confirmed, Workweave saves the task ID and tries to post a confirmation in the Slack thread with a link to the task.
 
 ```text
-Person ──HAS_ROLE──▶ Role ──RESPONSIBLE_FOR──▶ Responsibility
-   ▲
-   └──ASSIGNED_TO── ExternalTask
+Slack request
+    ↓
+AI prepares a draft
+    ↓
+FalkorDB finds suitable people and their supporting connections
+    ↓
+Administrator reviews and approves
+    ↓
+Worker creates the ClickUp task
+    ↓
+Task ID, confirmation and later outcome are saved
 ```
 
-FalkorDB finds eligible, confirmed, ClickUp-mapped people whose roles or responsibilities match, and joins their past assigned tasks. Python scores the bounded graph results using responsibility overlap, similar on-time completions, overdue/reassigned work, and current workload. The UI can show real path IDs, factors, and current attached evidence.
+The app does not create ClickUp tasks or send confirmation replies just because an AI model said to do so. Human approval is the gate.
 
-This score is a transparent heuristic. It is not a learned employee-performance ranking, and a human still chooses whether to approve the proposal.
+## What happens if a connection fails?
 
-## A task should not be created twice because a response was lost
+A network problem should not create the same task twice.
 
-External writes introduced a more difficult engineering question than showing a connected badge.
+Each approved job has a stable ID and a marker that can be found in ClickUp. Before creating a task, the worker checks whether that task already exists.
 
-Suppose ClickUp creates a task, but the network connection drops before Workweave saves the response. Retrying the same POST could create a second task.
+If ClickUp may have accepted the task but its reply was lost, Workweave searches for the existing task. It does not blindly send another create request. If the result is still unclear, it pauses for review.
 
-Workweave uses deterministic outbox IDs, graph-side leases, unique worker ownership, and an external marker. Before creation, it searches for that marker. A search error does not count as “task absent.” A persisted `create_started` flag prevents blind resending after an uncertain write.
+Slack confirmation is tracked separately. A failed Slack reply does not erase the ClickUp task or falsely mark the entire job complete.
 
-If the existing task is found, the worker reconciles its ID and restores the graph assignment. If the outcome remains uncertain, it pauses for review. Slack confirmation is tracked separately: a failed reply does not erase the created ClickUp task or silently mark the whole job successful.
+These checks make recovery safer. They do not mean three separate services share one perfect, exactly-once transaction.
 
-There is no distributed transaction spanning Slack, ClickUp and FalkorDB. The practical goal is recoverable state and conservative handling of uncertainty, not an exactly-once promise the external APIs do not provide.
+## What the app remembers
 
-## Architecture in plain language
+Workweave keeps conversations, investigations, internal tasks, approved procedures, and recorded outcomes in the company's graph. A user can return later and see what was found and what happened next.
 
-The browser is a **Next.js/React** workspace. It uses a same-origin proxy to reach **FastAPI**. Authentication and membership checks select the appropriate company graph before retrieval or tool execution.
+The ClickUp worker also periodically checks task updates. Those recorded outcomes can help with later assignment suggestions. This is the app reading saved context, not training a new AI model on every message.
 
-The backend connects to **FalkorDB**, an optional self-hosted Ollama embedding service, and the configured answer providers. Ollama Cloud is the default chat provider; permitted and configured fallbacks can be used if needed. Embeddings and chat are separate services.
+Company workspaces have separate knowledge graphs. Access checks also control which company and private conversation a user can read.
 
-Slack events enter through a signature-checked receiver. Background workers persist proposals and delivery state in FalkorDB. External writes wait for administrator approval. The encrypted credential vault lives on a backend volume, outside the company knowledge graph.
+## Why the demo includes a delivery delay
 
-The frontend and API run as separate Fly apps from one repository. The [architecture guide](https://github.com/Haleem-code/Workweave/blob/main/docs/architecture.md) contains component, ingestion, integration and recovery diagrams, plus links to the implementing modules.
+The delivery example makes the relationships easy to see. A supplier shipment changes date. Workweave follows the connected purchase order to customer commitments, then checks deadlines and stock.
 
-## Test the idea across different companies
+Two orders need attention. Two other connected orders are excluded for clear reasons. An unrelated order is outside the investigation's paths.
 
-I prepared four fictional company packs so reviewers can test more than a single rehearsed question:
+This is one implemented operational workflow. Company document questions and role-based task routing are broader features. Deeper checks for other industries need the right structured data and supported relationships; choosing an industry during onboarding does not create all those rules automatically.
 
-- **KoraBridge Logistics:** delivery exceptions, operations ownership and project context.
-- **Sunvale Energy Systems:** installation projects and blocked sites.
-- **Cedargrain Foods:** quality release authority and deliberately unconfirmed dates.
-- **Meridian Harbor Software:** project ownership, planned releases and shipping status.
+## A simple view of the architecture
 
-Each pack includes a PDF profile, Markdown procedure, and text report. A separate guide contains 24 questions and an answer key. Reviewers should upload the company documents, not the answer key, and use a separate workspace for each company.
+![Workweave architecture: company documents, FalkorDB memory, and the Slack-to-reviewed-ClickUp workflow.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/workweave-architecture.png)
 
-The packs include repeated names and intentionally absent facts. Those choices exercise tenant isolation and the ability to admit uncertainty. They do not establish that every company workflow can be inferred from arbitrary files.
+- **Next.js and React:** the interface people use.
+- **FastAPI:** sign-in, access checks, imports, questions and integration endpoints.
+- **FalkorDB:** company facts, relationships, conversations, tasks, job state and memory.
+- **Configured AI providers:** extract proposed work and help write source-grounded answers.
+- **Background workers:** process requests and deliver approved external actions.
+- **Encrypted backend vault:** stores credentials separately from company knowledge.
 
-[Open the company-pack guide](https://github.com/Haleem-code/Workweave/tree/main/docs/testing)
+[See the architecture diagrams and source-file map](https://github.com/Haleem-code/Workweave/blob/main/docs/architecture.md).
 
-## What was verified—and what remains
+## What has actually been tested?
 
-The latest complete backend run passed **57 tests** inside Linux against disposable real FalkorDB. External Slack and ClickUp responses were controlled in these tests. Coverage includes real assignment paths, current-source filtering, atomic claims, competing workers, approval gating, lost responses, reply retries, tenant boundaries, private MCP, and interrupted-work recovery. The frontend production build and TypeScript check passed.
+The complete backend suite passed **57 tests** in Linux using a real disposable FalkorDB database. Tests used controlled Slack and ClickUp responses to check the full request, assignment, approval, creation and confirmation flow. They also tested competing workers, lost responses, stale sources, permissions and recovery. The frontend production build and TypeScript check passed.
 
-The recording demonstrates the running application, source inspection, operational investigation, persisted outcomes, Slack account authentication, and integration setup. It does **not** demonstrate a completed live Slack-to-ClickUp dispatch: channel discovery still needed Slack permissions, and ClickUp was not connected in that recording.
+In the public video, Slack authentication succeeded for KoraBridge, but channel permissions were still pending. ClickUp is shown at setup. The recording therefore does not claim a completed live Slack-to-ClickUp dispatch.
 
-Current boundaries also include reviewed manual onboarding, bounded worker scans, token-based connector installation, no scanned-PDF OCR, and separate provisioning for hosted embeddings. Public multi-customer OAuth and broader connector coverage are future work.
+The repository includes four fictional company packs and a separate reviewer question guide. Reviewers should upload the company documents, not the answer key, and use a separate workspace for each company.
 
-## Why I chose Company Brain
+[Try the company packs](https://github.com/Haleem-code/Workweave/tree/main/docs/testing).
 
-The central product is a shared understanding of how a company works: its evidence, people, dependencies, procedures, and decisions. Memory and reviewed actions make that understanding useful over time. **Company Brain is the named submission track.**
+## Tracks and build disclosure
 
-OpenAI Codex assisted with implementation, fixes, verification, deployment, documentation, and video preparation. I directed the product goals, company scenarios, integration work and acceptance feedback. The narration is synthetic. Before submission, I must be able to explain the code, graph model, queries and engineering decisions myself.
+The named tracks are **Company Brain**, **Agent Memory and Coordination**, and **Agents That Act on Connected Data**. Company knowledge and source-backed answers support the first. Saved outcomes, checkpoints and the investigator-to-coordinator handoff support the second. Graph investigations that identify affected commitments, resolve owners and create internal review tasks support the third. The connected-data action claim does not depend on a completed live Slack-to-ClickUp dispatch. High-concurrency autonomous-agent operation has not been benchmarked.
 
-Earlier project documentation described pre-event prototype work. That history is preserved in the repository's [submission disclosure](https://github.com/Haleem-code/Workweave/blob/main/docs/submission-disclosure.md); this article does not claim that the whole implementation began during the event or that organizers have confirmed eligibility.
+OpenAI Codex assisted with code, fixes, testing, deployment, documentation, and video preparation. I directed the product, company scenarios and acceptance feedback. The video uses synthetic narration. I must understand and explain the submitted implementation myself.
 
-The ambition is practical: when someone asks what changed, what it affects, and who should act, the answer should carry a source, a connection, a reviewable next step, and a memory of what happened afterward.
+Earlier documentation described pre-event prototype work. That history is preserved in the [submission disclosure](https://github.com/Haleem-code/Workweave/blob/main/docs/submission-disclosure.md); this article does not claim that the entire implementation began during the event or that eligibility has been confirmed.
 
-**[Try Workweave](https://workweave-web.fly.dev) · [Watch the demo](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4) · [Read the README](https://github.com/Haleem-code/Workweave) · [Captions](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.srt)**
+**[Open Workweave](https://workweave-web.fly.dev) · [Watch the demo](https://youtu.be/3Rfimah_TUQ) · [View the code](https://github.com/Haleem-code/Workweave)**

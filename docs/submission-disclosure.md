@@ -1,7 +1,10 @@
 # Submission disclosure and readiness
 
-**Named track: Company Brain.** Memory and internal coordination are supporting
-features; the current README does not declare additional tracks.
+**Named tracks: Company Brain; Agent Memory and Coordination; Agents That Act on
+Connected Data.** Memory and coordination are supported by persisted outcomes,
+checkpoints and internal handoffs. Connected-data actions are supported by graph
+investigations that create internal review tasks. Neither claim requires a
+completed live Slack-to-ClickUp dispatch or high-throughput autonomous agents.
 
 ## Build history
 
@@ -52,7 +55,7 @@ Access to a document alone does not establish permission to use it as demo data.
 | Core Cypher queries | `docs/graph-queries.cypher`, with source references |
 | Working-project video | Complete 3:50 MP4 and captions included in `docs/media/`; README and blog link the repository-hosted video. Public links require pushing those files. Slack authentication verified; channel permissions pending; ClickUp setup-only in the recording |
 | Live deployment or complete local setup | Frontend/backend live and local setup included; password onboarding and an Ollama Cloud response verified in the live audit; hosted embeddings and complete Google consent remain unverified |
-| Named track | Company Brain |
+| Named tracks | Company Brain; Agent Memory and Coordination; Agents That Act on Connected Data |
 | AI assistance | Disclosed |
 | Event-window history | Prior prototype disclosed; eligibility clarification outstanding |
 

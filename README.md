@@ -7,38 +7,67 @@ Ask a company question. Follow the evidence. Understand what a change affects. K
 [![FalkorDB](https://img.shields.io/badge/Graph-FalkorDB-355B47)](https://www.falkordb.com/)
 ![Stack](https://img.shields.io/badge/Stack-Next.js_·_FastAPI-172B22)
 ![Track](https://img.shields.io/badge/Graph_Hacks-Company_Brain-355B47)
+![Track](https://img.shields.io/badge/Graph_Hacks-Agent_Memory_and_Coordination-355B47)
+![Track](https://img.shields.io/badge/Graph_Hacks-Agents_That_Act_on_Connected_Data-355B47)
 
-**[Open the live app](https://workweave-web.fly.dev) · [Watch the demo](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4) · [Read the build story](docs/workweave-blog.md) · [Try a company pack](docs/testing/README.md)**
+**[Open the live app](https://workweave-web.fly.dev) · [Watch the demo](https://youtu.be/3Rfimah_TUQ) · [Read the build story](docs/workweave-blog.md) · [Try a company pack](docs/testing/README.md)**
 
-Workweave connects documents, people, responsibilities, operational dependencies, and remembered outcomes in **FalkorDB**. It helps a team answer three practical questions:
+Workweave is a company knowledge and work assistant for teams across industries. It connects documents, people, responsibilities, recorded dependencies, and past outcomes in **FalkorDB**. Logistics is one demonstration of the product, alongside energy, food production, and software company test packs.
+
+It helps a team answer three practical questions:
 
 - **What do we know?** Ask about current company documents and inspect the cited source.
-- **What does this change affect?** Follow recorded dependencies, check dates and stock, and explain which commitments need attention.
+- **What does this change affect?** Follow recorded dependencies and explain which connected commitments need attention.
 - **Who should act next?** Review a graph-supported task proposal before approving an external action.
 
-**Named submission track: Company Brain.** Persistent memory, internal handoffs, and connected-data actions support that central company knowledge workflow.
+**Submission tracks: Company Brain; Agent Memory and Coordination; Agents That Act on Connected Data.** The same workflow connects company knowledge, remembers what happened, and turns graph-supported findings into accountable next steps.
+
+| Track | What Workweave demonstrates | Where to inspect it |
+| --- | --- | --- |
+| Company Brain | Connect current company evidence, people and responsibilities; answer questions with sources | Documents, Company, People & roles, and Ask |
+| Agent Memory and Coordination | Preserve investigations, outcomes, checkpoints and the investigator-to-coordinator handoff | Saved investigations, internal review tasks and remembered outcomes |
+| Agents That Act on Connected Data | Traverse recorded dependencies, evaluate impact, resolve ownership and create internal review tasks from eligible findings | Home → Try the example → investigation, paths, handoff and tasks |
+
+Internal review-task creation demonstrates action on connected data. Slack and ClickUp add an external action workflow that requires human approval; its verification status is documented below.
+
+**Start here:** [Watch the demo](https://youtu.be/3Rfimah_TUQ), [test a fictional company](#try-it-with-four-fictional-companies), or [run locally](#run-locally). For technical review, see the [architecture](#architecture) and [core graph queries](#the-graph-does-real-work).
+
+## Built around how your company works
+
+The shared foundation is the same across companies: add information, confirm who is responsible, ask questions, review suggested work, and remember what happened.
+
+| Company | Examples of knowledge it can bring |
+| --- | --- |
+| Logistics | Delivery procedures, team responsibilities and order records |
+| Energy | Project guides, site reports and approval responsibilities |
+| Food production | Quality procedures, production reports and release authority |
+| Software | Project plans, support procedures and release ownership |
+
+Company questions use the documents you provide. Slack task proposals use the roles and responsibilities you confirm, rather than an industry-specific job list. Deeper impact checks need the relevant structured data and supported relationships: the implemented operational example uses supplier/order dependencies. Workweave does not automatically understand every industry's specialist rules from an onboarding choice.
 
 ## Watch the working app · 3 minutes 50 seconds
 
-[![Watch the complete Workweave demo](docs/images/demo-poster.jpg)](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4)
+[![Watch the complete Workweave demo](docs/images/demo-poster.jpg)](https://youtu.be/3Rfimah_TUQ)
 
-**[Play/download MP4](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4) · [Repository video file](docs/media/workweave-demo-3m50s.mp4) · [Captions](docs/media/workweave-demo-3m50s.srt)**
+**[Watch on YouTube](https://youtu.be/3Rfimah_TUQ) · [Download MP4](docs/media/workweave-demo-3m50s.mp4) · [Captions](docs/media/workweave-demo-3m50s.srt)**
 
-The complete video is included in this repository: **1080p, 30 fps, synthetic narration, captions, and 230 seconds**. If your Markdown reader does not play MP4 inline, use the direct video link or download it. The public links become available when these files are pushed to the repository's `main` branch.
+Watch the complete demo on YouTube: **1080p, 30 fps, synthetic narration, captions, and 230 seconds**. The MP4 and captions are also included in this repository for download.
 
 | Time | What you see |
 | --- | --- |
 | 0:00–0:32 | The problem and company onboarding |
 | 0:32–1:00 | Document preview, confirmation, and company context |
 | 1:00–1:35 | An answer, its citation, a missing fact, and conversation history |
-| 1:35–2:25 | A supplier-delay investigation, exclusions, ownership, and handoff |
+| 1:35–2:25 | Follow a change through connected company data, using a supplier delay as the example |
 | 2:25–2:50 | Task completion and an outcome that survives refresh |
 | 2:50–3:25 | KoraBridge Slack authentication, event setup, roster, Task Inbox, and ClickUp setup |
 | 3:25–3:50 | FalkorDB architecture and closing |
 
 **Recording scope:** Slack authenticated successfully as KoraBridge. Channel discovery still returned `missing_scope`, so live channel monitoring is labelled pending. ClickUp is shown as setup-only; no live ClickUp task or live Slack-to-ClickUp dispatch is claimed. The automated integration tests exercise that complete flow with real FalkorDB and controlled external API responses.
 
-## One change. A useful explanation.
+## A concrete example: follow the impact of a change
+
+The video uses a supplier delay to make the graph reasoning easy to inspect. This is one supported workflow within the broader company knowledge product.
 
 In the included **Harbor Supply** example, a supplier shipment moves to October 23. Workweave follows the purchase order's recorded dependencies and checks the actual commitments:
 
@@ -55,6 +84,13 @@ The result is more than a list of matching records: it includes paths, supportin
 This example is explicitly deterministic. It demonstrates the real graph workflow without presenting a scripted result as an LLM response.
 
 ## Architecture
+
+![Workweave architecture: company documents, FalkorDB memory, and a human-approved Slack-to-ClickUp workflow](docs/images/workweave-architecture.png)
+
+The overview above shows the main components. Expand the diagram below for the detailed request and worker paths.
+
+<details>
+<summary>Detailed component diagram</summary>
 
 ```mermaid
 flowchart TB
@@ -94,6 +130,8 @@ flowchart TB
   Outcomes --> Company
   API --> Vault[Encrypted credentials on backend volume]
 ```
+
+</details>
 
 The browser never receives provider secrets from the backend. Company facts and workflow state live in FalkorDB; the separate encrypted vault holds credentials. The hosted frontend and backend run as two Fly apps from this monorepo.
 
@@ -294,9 +332,11 @@ GitHub pushes deploy automatically only if the corresponding integration/workflo
 
 ## Submission, data and authorship
 
-**Track: Company Brain.** The submission includes source, setup instructions, the graph model, core queries, a complete demo video, and a live app. Use only synthetic or otherwise event-permitted data for judging.
+**Tracks:** Company Brain; Agent Memory and Coordination; Agents That Act on Connected Data. The evidence for each track appears in the table at the beginning of this README.
 
-**AI assistance:** OpenAI Codex assisted with implementation, fixes, tests, deployment, documentation, and video preparation. The participant directed the product, company scenarios, integrations, and acceptance feedback. Narration is synthetic, using Microsoft Sonia through Edge TTS. The submitter must understand and explain the submitted code and design.
+The repository includes setup instructions, the graph model, core queries, four synthetic company packs, a demo video, and live deployment links. Use only synthetic or otherwise event-permitted data for judging.
+
+**AI assistance and my contribution:** OpenAI Codex assisted with coding, bug fixes, testing, deployment, documentation, and demo video preparation. I directed the product, developed the company scenarios, and reviewed the results. The video uses synthetic narration (Microsoft Sonia through Edge TTS). I reviewed and tested the implementation and can explain its architecture, graph model, and technical decisions.
 
 **Build history:** earlier documentation described a pre-event prototype. That disclosure is preserved in [submission history](docs/submission-disclosure.md); this README does not assert that all implementation began during the event or that eligibility has been confirmed. The [organizer's rules](https://www.wemakedevs.org/hackathons/falkordb/rules) govern eligibility.
 
