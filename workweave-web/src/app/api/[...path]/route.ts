@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic'
 // the upstream Host for routing; the API permits only configured browser origins.
 async function proxy(request: Request) {
   const incoming = new URL(request.url)
-  const backend = process.env.API_URL || (process.env.NODE_ENV === 'development' ? 'http://127.0.0.1:8088' : 'http://api:8000')
+  const defaultDev = process.env.API_URL || process.env.BACKEND_URL || 'http://127.0.0.1:8000'
+  const backend = process.env.NODE_ENV === 'development' ? defaultDev : (process.env.API_URL || 'http://api:8000')
   const target = new URL(incoming.pathname + incoming.search, backend)
   const headers: Record<string,string> = Object.fromEntries(request.headers)
   for (const key of ['connection','transfer-encoding','content-length','accept-encoding']) delete headers[key]

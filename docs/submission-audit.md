@@ -1,5 +1,10 @@
 # Submission audit — October 17, 2026
 
+**Later update:** this report describes the core audit before workplace adapters
+were added. Connections now provides selected read-only Slack/ClickUp snapshots;
+see [the current connection guide](workplace-connections.md). Real-account tests
+and the video update are pending the participant connecting synthetic content.
+
 This audit exercises a defined demo journey. It does not assign a judging score,
 guarantee eligibility, or certify every possible company workflow.
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react'
-import { Activity, ArrowRight, BookOpen, Building2, Check, ChevronDown, Database, FileText, History, Layers3, Menu, MessageSquare, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings2, ShieldCheck, Sparkles, Upload, Users, Workflow, X } from 'lucide-react'
+import { Activity, ArrowRight, BookOpen, Building2, Check, ChevronDown, Database, FileText, History, Inbox, Layers3, Menu, MessageSquare, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings2, ShieldCheck, Sparkles, Upload, Users, Workflow, X } from 'lucide-react'
 import { People } from './components/People'
 import { Account, AccountMenu, WorkspaceSwitcher } from './components/WorkspaceChrome'
 import { ConversationHistory, ConversationSummary, RecentActivity } from './components/ConversationHistory'
@@ -9,6 +9,9 @@ import { api, ApiError, Company, EvidenceReference, GraphPath, Mapping, MemoryEn
 import { Setup } from './components/Setup'
 import { AISettings } from './components/AISettings'
 import { DemoWorkspace } from './components/DemoWorkspace'
+import { Connections } from './components/Connections'
+import { TaskInbox } from './components/TaskInbox'
+import { TeamRoster } from './components/TeamRoster'
 import { workAreas, workspacePriorities } from './company-context'
 import { Welcome, WeaveMark } from './components/Welcome'
 import type { Readiness } from './api'
@@ -18,6 +21,7 @@ const navSections = [
     category: 'YOUR WORKSPACE',
     items: [
       { name: 'Work', label: 'Home', hint: 'Your next steps', icon: Layers3 },
+      { name: 'Inbox', label: 'Task Inbox', hint: 'Slack triage & ClickUp', icon: Inbox },
       { name: 'Assistant', label: 'Ask', hint: 'Questions & answers', icon: MessageSquare }
     ]
   },
@@ -25,8 +29,10 @@ const navSections = [
     category: 'YOUR COMPANY',
     items: [
       { name: 'Sources', label: 'Documents', hint: 'Upload & update files', icon: FileText },
+      { name: 'Roster', label: 'Team Roster', hint: 'Roles, ClickUp & Slack', icon: ShieldCheck },
       { name: 'People', label: 'People & roles', hint: 'Who does what', icon: Users },
-      { name: 'Company', label: 'Company', hint: 'About your business', icon: Building2 }
+      { name: 'Company', label: 'Company', hint: 'About your business', icon: Building2 },
+      { name: 'Connections', label: 'Connections', hint: 'Slack & ClickUp', icon: Workflow }
     ]
   },
   {
@@ -941,6 +947,33 @@ export default function App() {
           </>
         )}
 
+        {screen === 'Inbox' && (
+          <TaskInbox
+            key={company.id}
+            base={apiBase}
+            onRoster={() => switchScreen('Roster')}
+            onConnections={() => switchScreen('Connections')}
+            onCitation={citation}
+          />
+        )}
+        {screen === 'Roster' && (
+          <TeamRoster
+            key={company.id}
+            base={apiBase}
+            onConnections={() => switchScreen('Connections')}
+            onPeople={() => switchScreen('People')}
+            onCitation={citation}
+          />
+        )}
+        {screen === 'Connections' && (
+          <Connections
+            key={company.id}
+            base={apiBase}
+            onDocuments={() => switchScreen('Sources')}
+            onInbox={() => switchScreen('Inbox')}
+            onRoster={() => switchScreen('Roster')}
+          />
+        )}
         {screen === 'People' && <People key={company.id} base={apiBase} onDocument={() => switchScreen('Sources')} onCitation={citation} />}
 
         {screen === 'Company' && (

@@ -2,6 +2,10 @@
 
 **Ask your company a question. Follow the evidence. Keep the next step accountable.**
 
+![FalkorDB](https://img.shields.io/badge/Graph-FalkorDB-365b46)
+![Track](https://img.shields.io/badge/Graph_Hacks-Company_Brain-365b46)
+![Stack](https://img.shields.io/badge/Stack-Next.js_%2B_FastAPI-272c27)
+
 Workweave turns company documents and spreadsheets into a shared company brain.
 It connects accepted facts, responsibilities, operational dependencies, and past
 outcomes in **FalkorDB**, so answers can point back to their sources.
@@ -11,9 +15,11 @@ change matters, and remember what your team did about it.
 
 **Graph Hacks track: Company Brain.**
 
-[Open Workweave](https://workweave-web.fly.dev) · [Try the company packs](docs/testing/README.md) · [Graph model](docs/graph-model.md) · [Cypher queries](docs/graph-queries.cypher)
+[Open Workweave](https://workweave-web.fly.dev) · [Try the company packs](docs/testing/README.md) · [Connect Slack / ClickUp](docs/workplace-connections.md) · [Graph model](docs/graph-model.md) · [Cypher queries](docs/graph-queries.cypher) · [Project story](docs/workweave-blog.md)
 
-**Demo video:** not recorded yet; a working-project video is still required before submission.
+**Demo video:** the 3:30 walkthrough has been recorded locally. Its public viewing
+link is still required before submission. A workplace-connection scene will be
+added after testing the participant's synthetic Slack and ClickUp accounts.
 
 > **Build-history disclosure:** an earlier version of this repository described a
 > pre-event prototype. That history is preserved in the [submission disclosure](docs/submission-disclosure.md).
@@ -76,6 +82,35 @@ app admits that it does not know.
 Narrative documents test source-grounded answers. They do not automatically create
 all the typed order/supplier relationships used by the operational workflow.
 
+### Connect work where it happens
+
+Open **Connections** in the company sidebar. Select **Slack** or **ClickUp**, enter
+the credential privately, and choose one fictional demo channel or task list.
+**Read & preview → Confirm & import → Ask with source evidence.**
+
+**No accounts or tokens for a quick test:** choose **Try Slack demo data** or
+**Try ClickUp demo data**. Review and confirm the fictional messages/tasks. These
+fixtures are labelled synthetic and do not show a live connection as successful.
+
+![Workweave Connections: Slack and ClickUp sources with separate demo-data options](docs/images/connections.png)
+
+| Tool | Credential | What this version reads |
+| --- | --- | --- |
+| Slack | Bot token + public channel ID | Up to 15 recent top-level text messages |
+| ClickUp | Personal token + list ID, for your own demo account | Up to 15 tasks, with names, status, assignees, and descriptions |
+
+Tokens stay encrypted on the backend and are not stored in company graph payloads.
+Nothing is posted back to either tool. Re-read a selected source when you want a
+new snapshot; this release has no scheduled sync or webhooks. Content enters
+company knowledge only after you confirm its preview. A workspace-tool snapshot
+does not automatically create typed supplier/order dependencies.
+
+The adapters and demo mode are tested with controlled API responses. Real-account
+verification is pending the participant's connection of their synthetic workspace.
+Free-plan setup, permissions, limits, and disconnection are explained in the
+[connection guide](docs/workplace-connections.md). Public multi-customer OAuth
+onboarding is future work; this version uses administrator-supplied demo tokens.
+
 ## Why FalkorDB is essential
 
 FalkorDB is the application's primary store, not a graph drawn over another
@@ -133,6 +168,8 @@ with links to their implementations in the [graph model](docs/graph-model.md).
 flowchart TB
     Browser[Browser workspace: Next.js and React] -->|Same-origin API proxy| API[FastAPI]
     Files[Uploaded documents and spreadsheets] --> Preview[Parse, preview, confirm]
+    Workplace[Selected Slack channel / ClickUp list] --> Snapshot[Read-only API snapshot]
+    Snapshot --> Preview
     API --> Preview
     Preview --> Graph[(FalkorDB)]
     Preview --> Embeddings[Self-hosted Ollama embeddings]
@@ -244,10 +281,10 @@ file. There is no OCR for scanned PDFs. Confirmed operational entity types are
 Supplier, Product, PurchaseOrder, SalesOrder, Team, and general BusinessRecord.
 Role suggestions support limited patterns and need review.
 
-**Slack and ClickUp live connectors, continuous synchronization, automatic rider
-tracking, and arbitrary industry-specific actions are not implemented.** Importing
-synthetic messages/tasks into those products does not connect them to Workweave.
-Internal review tasks do not send emails, notify customers, or modify external apps.
+Slack and ClickUp support selected, read-only snapshots through **Connections**.
+Continuous synchronization, threaded replies, attachments, automatic rider tracking,
+and external task updates are not implemented. A snapshot must be reviewed and
+confirmed. Internal review tasks do not send emails or notify customers.
 
 Document embeddings use `embeddinggemma:300m` through a reachable self-hosted
 Ollama service. Missing embeddings degrade semantic search; exact/full-text and
@@ -265,6 +302,11 @@ and TypeScript check passed. Browser audits use new synthetic accounts and compa
 data to exercise onboarding, imports, citations, history, task outcomes, mobile
 layout, and the example investigation. See the [audit report](docs/submission-audit.md)
 for the live results and remaining gaps.
+
+The later workplace-tool addition passed **3 isolated connector tests**. Both
+synthetic imports were also confirmed and saved through the live interface.
+These are additional checks; the full database suite was not rerun after the
+connector changes.
 
 For developer test instructions and the recording walkthrough, see
 [development and demo](docs/development-and-demo.md). These checks are not a

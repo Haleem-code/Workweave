@@ -168,7 +168,7 @@ export function Setup({ onSuccess, onSwitchToSignIn, onCancel, resumeCompany, in
           <p className="ww-setup-document-hint">Review each file before adding it to company knowledge. You can also add documents later.</p>
           {sources.map(source => <div className="ww-accepted-source" key={source.id}><FileText size={17} /><div><strong>{source.name}</strong><small>{source.record_count} records · {source.chunk_count} excerpts</small></div><span><Check size={13} /> Imported</span></div>)}
           {previews.map(preview => <ImportReview key={preview.id} preview={preview} mappings={mappings[preview.id] || preview.tables.map(t => t.suggested_mapping)} onChange={next => setMappings(old => ({ ...old, [preview.id]: next }))} onConfirm={() => { void confirmImport(preview) }} busy={busy} />)}
-          <details className="ww-setup-connection-note"><summary>Already using Slack or ClickUp?</summary><p>Slack and ClickUp connections are not available in this version yet. Finish setup now and add your company documents whenever you are ready.</p></details>
+          <details className="ww-setup-connection-note"><summary>Already using Slack or ClickUp?</summary><p>Finish setup, then open Connections to read a selected demo channel or task list. You can preview its content before importing it.</p></details>
         </div>}
 
         {step === 4 && <div className="ww-setup-review">

@@ -47,7 +47,11 @@ Keep actions in order. A cut may remove dead time, but label accelerated model/d
 
 Prioritize one complete verified workflow, legible evidence, and an easy way for a reviewer to reproduce it. Defer the mascot, additional connectors, broad redesign, and any unverified automation.
 
-Slack and ClickUp must be mentioned accurately: synthetic messages/tasks were prepared in those services, but this app currently has no live Slack or ClickUp connector. Their setup can appear in supporting documentation; showing their interfaces is not proof of Workweave synchronization. Account access is not needed to record the existing Workweave demo.
+The original captured video predates the Connections interface. Read-only Slack
+and ClickUp adapters have since been added; see [connection setup](workplace-connections.md).
+The participant has asked to defer video changes until connecting their fictional
+workspace. Capture the actual selected-source preview and confirmed import before
+claiming a successful connection. Do not present these snapshots as automatic sync.
 
 A mascot can show agent status later, but it does not implement memory. Persistent scoped state, evidence, outcome updates, and cross-session recall are the memory features to prove.
 

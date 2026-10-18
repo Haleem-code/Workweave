@@ -40,6 +40,16 @@ class Settings(BaseSettings):
     # This does not enable CORS or trust client-supplied forwarding headers.
     allowed_origins: list[str] = []
     frontend_dir: Path = Path(__file__).resolve().parents[2] / "workweave-web" / "dist"
+    public_base_url: str = "http://localhost:8000"
+    bootstrap_company_id: str = ""
+    slack_bot_token: SecretStr = SecretStr("")
+    slack_signing_secret: SecretStr = SecretStr("")
+    slack_app_id: str = ""
+    slack_client_id: str = ""
+    slack_client_secret: SecretStr = SecretStr("")
+    slack_verification_token: SecretStr = SecretStr("")
+    clickup_api_token: SecretStr = SecretStr("")
+    clickup_list_id: str = ""
 
     @property
     def ollama_cloud_model_valid(self) -> bool:

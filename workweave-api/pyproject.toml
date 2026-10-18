@@ -12,6 +12,6 @@ dependencies = {file = ["requirements.txt"]}
 [tool.setuptools.packages.find]
 include = ["workweave_api*"]
 [tool.pytest.ini_options]
-testpaths = ["tests/test_acceptance.py", "tests/test_mcp.py", "tests/test_drive.py"]
+testpaths = ["tests"]
 asyncio_mode = "auto"
 faulthandler_timeout = 180

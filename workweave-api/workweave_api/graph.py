@@ -56,6 +56,16 @@ class Graph:
                 await self.query(name, "CREATE FULLTEXT INDEX FOR (n:Chunk) ON (n.text)")
             if ("Chunk", "VECTOR") not in present:
                 await self.query(name, "CREATE VECTOR INDEX FOR (n:Chunk) ON (n.embedding) OPTIONS {dimension:768, similarityFunction:'cosine'}")
+            if ("Responsibility", "FULLTEXT") not in present:
+                try:
+                    await self.query(name, "CREATE FULLTEXT INDEX FOR (n:Responsibility) ON (n.text)")
+                except Exception:
+                    pass
+            if ("ExternalTask", "FULLTEXT") not in present:
+                try:
+                    await self.query(name, "CREATE FULLTEXT INDEX FOR (n:ExternalTask) ON (n.title)")
+                except Exception:
+                    pass
 
     async def close(self):
         await self.redis.aclose()
@@ -65,8 +75,10 @@ def decode_scalar(cell):
     kind, value = cell
     if kind == 1:
         return None
-    if kind in (2, 3, 5):
+    if kind in (2, 3):
         return value
+    if kind == 5:
+        return float(value)
     if kind == 4:
         return value == "true"
     if kind == 6:

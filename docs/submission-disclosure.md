@@ -48,7 +48,7 @@ Access to a document alone does not establish permission to use it as demo data.
 | Public source repository | Intended repository: `Haleem-code/Workweave`; confirm public visibility and push current local files |
 | Setup instructions and graph model | README and linked guides |
 | Core Cypher queries | `docs/graph-queries.cypher`, with source references |
-| Working-project video | **Not recorded yet**, confirmed by the participant |
+| Working-project video | 3:30 walkthrough recorded locally; public viewing link pending; connector scene deferred until real-account verification |
 | Live deployment or complete local setup | Frontend/backend live and local setup included; password onboarding and an Ollama Cloud response verified in the live audit; hosted embeddings and complete Google consent remain unverified |
 | Named track | Company Brain |
 | AI assistance | Disclosed |

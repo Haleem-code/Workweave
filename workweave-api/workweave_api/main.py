@@ -22,6 +22,7 @@ from .understanding import current_chunks, suggest_people, draft_profile
 from .identity import account_view
 from . import ingestion
 from .models import default_provider_policy, effective_provider_policy
+from .outbox import IntegrationWorker
 
 
 class Credential(BaseModel):
@@ -37,6 +38,7 @@ def create_app(config: Settings = settings):
     graph, router = Graph(config.graph_connection_url), Router(config)
     control = Store(graph, "ww_control")
     engine, hasher = Engine(graph, router), PasswordHasher()
+    worker = IntegrationWorker(graph, router, control, config)
     login_attempts = {}
 
     @asynccontextmanager
@@ -51,16 +53,18 @@ def create_app(config: Settings = settings):
                 os.chmod(destination, 0o600)
             await control.put("user", {"id": "local_admin", "username": config.admin_username, "password_hash": hasher.hash(password), "admin": True})
         await engine.start()
+        await worker.start()
         try:
             yield
         finally:
+            await worker.stop()
             await engine.stop()
             await router.close()
             await graph.close()
 
     app = FastAPI(title="Workweave", version="0.1.0-prototype", lifespan=lifespan)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=config.allowed_hosts)
-    app.state.graph, app.state.router, app.state.engine = graph, router, engine
+    app.state.graph, app.state.router, app.state.engine, app.state.worker = graph, router, engine, worker
 
     @app.middleware("http")
     async def same_origin(request, next_call):
@@ -568,6 +572,12 @@ def create_app(config: Settings = settings):
                     "status": "queued", "checkpoint": "preparing_example", "events": [], "findings": [], "paths": []})
                 await engine.enqueue(company_id, run["id"])
             return {"runs": [run], "mode": "Deterministic graph workflow using synthetic data"}
+
+    from .connections import register_connections
+    register_connections(app, router, workspace, administrator, engine)
+
+    from .integrations import register_integrations
+    register_integrations(app, config, router, control, workspace, administrator, worker)
 
     # Optional connector is registered separately; the event profile disables private Drive.
     from .drive import register_drive
