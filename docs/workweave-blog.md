@@ -5,7 +5,7 @@ tags: falkordb, ai, hackathon, webdev
 published: false
 ---
 
-# What if your company information could help your team decide what to do next?
+## What if your company information could help your team decide what to do next?
 
 Most companies already have useful information. Some is in documents, some is in spreadsheets, and some is in Slack messages. The hard part is connecting it.
 
@@ -140,6 +140,18 @@ Slack confirmation is tracked separately. A failed Slack reply does not erase th
 
 These checks make recovery safer. They do not mean three separate services share one perfect, exactly-once transaction.
 
+### The difficult case: the task exists, but its response never arrives
+
+A timeout does not always mean an action failed. ClickUp could create a task, then the connection could fail before Workweave receives its ID. Retrying the same request could create a second task.
+
+The worker records that creation has started before sending the request. Each job also has a stable marker in its task description. On retry, the worker searches for that marker and saves the existing task ID if it finds one. If a previous creation attempt has an uncertain outcome, it does not blindly send another create request. An unsuccessful search request is not treated as proof that the task is absent.
+
+The regression test recreates this failure deliberately: the simulated ClickUp endpoint stores the task, then raises a read timeout. On the next worker attempt, the search returns that task. The test checks that there was **only one create request**, the saved job finished, and the task retained its person assignment.
+
+This test uses real FalkorDB storage and simulated external HTTP responses. It checks recovery logic; it is not evidence of a completed live ClickUp integration.
+
+[Read the lost-response and competing-worker tests](https://github.com/Haleem-code/Workweave/blob/main/workweave-api/tests/test_integration_regressions.py).
+
 ## What the app remembers
 
 Workweave keeps conversations, investigations, internal tasks, approved procedures, and recorded outcomes in the company's graph. A user can return later and see what was found and what happened next.
@@ -155,6 +167,42 @@ The delivery example makes the relationships easy to see. A supplier shipment ch
 Two orders need attention. Two other connected orders are excluded for clear reasons. An unrelated order is outside the investigation's paths.
 
 This is one implemented operational workflow. Company document questions and role-based task routing are broader features. Deeper checks for other industries need the right structured data and supported relationships; choosing an industry during onboarding does not create all those rules automatically.
+
+### The Cypher behind the result
+
+This is the dependency query used by the investigation tool. The application resolves the requested record against current source evidence before binding its ID to `$id`.
+
+```cypher
+MATCH path=(o:Entity {entity_type:'SalesOrder',active:true})
+  -[:DEPENDS_ON*1..4]->(target:Entity {id:$id,active:true})
+WHERE all(n IN nodes(path) WHERE n.active=true)
+MATCH (o)-[:DEPENDS_ON]->(po:Entity {entity_type:'PurchaseOrder',active:true})
+OPTIONAL MATCH (o)-[:DEPENDS_ON]->(product:Entity {entity_type:'Product',active:true})
+RETURN DISTINCT o.payload AS order_json, po.payload AS po_json,
+  product.payload AS product_json,
+  [n IN nodes(path) | n.id] AS path_ids
+ORDER BY o.required_date
+```
+
+In plain English, it finds active sales orders that depend on the changed record through one to four recorded connections. It also returns the purchase-order data, any linked product data, and the IDs along each path. Those IDs let the interface show how a commitment is connected to the change.
+
+The query finds candidates. Python then checks current source versions, required dates, delivery dates, quantities, and unallocated stock. A connected order is not automatically an affected order. The four-hop limit also means this is a bounded investigation, not a claim to inspect every possible dependency at any depth.
+
+[Inspect the query and business checks in `trace_impact`](https://github.com/Haleem-code/Workweave/blob/main/workweave-api/workweave_api/tools.py).
+
+### From a changed date to a remembered outcome
+
+**Before the investigation:** the supplier's arrival date has moved to October 23. That date alone does not tell a team which customers need attention.
+
+**After following the graph:** Workweave identifies two commitments needing review and creates two internal tasks for Customer Success. The Acme order needs 10 units by October 19, but only 2 unallocated units are available. Beacon needs 8 units by October 20, with none available. Other checked orders are excluded when their dates or stock cover them; an unrelated order is outside the investigated paths.
+
+![Workweave investigation showing the changed supplier date, two affected commitments, Customer Success ownership, and two open internal review tasks.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/blog-impact-review.png)
+
+**After someone acts:** the demo marks the Beacon review task done. The memory page then shows Beacon as done and Acme as open, alongside the original findings, source buttons, and current procedure. The next session can return to that recorded outcome.
+
+![Workweave memory showing the saved supplier-delay findings, Beacon review marked done, Acme review still open, source links, and the approved procedure.](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/images/blog-saved-outcome.png)
+
+These are screenshots from the synthetic Harbor Supply demo. Its investigation is deterministic and uses the implemented graph tools. Marking a review task done records the user's update; it does not prove that a delivery arrived or a customer was contacted. These internal tasks are separate from the ClickUp workflow described earlier.
 
 ## A simple view of the architecture
 
@@ -179,11 +227,19 @@ The repository includes four fictional company packs and a separate reviewer que
 
 [Try the company packs](https://github.com/Haleem-code/Workweave/tree/main/docs/testing).
 
+## What I learned
+
+Finding a connected record is only the first step. In the delivery example, the graph finds candidate orders, but dates and stock determine whether they actually need attention. Returning the path makes that decision easier to inspect.
+
+I also learned that a timeout is not proof of failure. Saving a job before processing it, recording external task IDs, and checking uncertain results are part of making an action reliable. A successful answer on screen is only one part of the workflow.
+
+Finally, connecting an account is different from having permission to read its data. Slack authentication worked in the recording, but channel discovery still needed additional scopes. The demo labels that setup as pending instead of presenting authentication as a completed integration.
+
 ## Tracks and build disclosure
 
 The named tracks are **Company Brain**, **Agent Memory and Coordination**, and **Agents That Act on Connected Data**. Company knowledge and source-backed answers support the first. Saved outcomes, checkpoints and the investigator-to-coordinator handoff support the second. Graph investigations that identify affected commitments, resolve owners and create internal review tasks support the third. The connected-data action claim does not depend on a completed live Slack-to-ClickUp dispatch. High-concurrency autonomous-agent operation has not been benchmarked.
 
-OpenAI Codex assisted with code, fixes, testing, deployment, documentation, and video preparation. I directed the product, company scenarios and acceptance feedback. The video uses synthetic narration. I must understand and explain the submitted implementation myself.
+OpenAI Codex and GitHub Copilot assisted with development. Codex also assisted with testing, deployment, documentation, and demo video preparation. I directed the product, developed the company scenarios, and reviewed the results. The video uses synthetic narration. I reviewed and tested the implementation and can explain its architecture, graph model, and technical decisions.
 
 Earlier documentation described pre-event prototype work. That history is preserved in the [submission disclosure](https://github.com/Haleem-code/Workweave/blob/main/docs/submission-disclosure.md); this article does not claim that the entire implementation began during the event or that eligibility has been confirmed.
 
