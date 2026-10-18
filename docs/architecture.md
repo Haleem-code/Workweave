@@ -67,7 +67,7 @@ sequenceDiagram
   participant G as Company graph
   participant E as Embedding service
   U->>API: Upload supported document or spreadsheet
-  API->>P: Parse sections or rows; prepare preview
+  API->>P: Parse sections or rows, prepare preview
   P-->>U: Preview and proposed mappings
   U->>API: Confirm import
   API->>G: Store source, version, chunks and mapped records

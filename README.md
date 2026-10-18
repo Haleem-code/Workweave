@@ -113,7 +113,7 @@ flowchart TB
   API --> Retrieval[Current evidence: exact, full-text, vector and graph retrieval]
   Retrieval <--> Company
   Retrieval --> Answer[Source-grounded answers]
-  Answer --> LLM[Ollama Cloud by default; configured fallbacks]
+  Answer --> LLM[Ollama Cloud by default, configured fallbacks]
   API --> Investigation[Investigator → Response coordinator]
   Investigation --> MCP[Reviewed tools / private stdio MCP]
   MCP <--> Company
@@ -244,9 +244,9 @@ sequenceDiagram
   API->>API: Verify route, signature, team and watched channel
   API->>G: Persist event once
   API-->>S: Acknowledge
-  W->>G: Claim event; traverse assignment graph
+  W->>G: Claim event, traverse assignment graph
   W->>G: Save proposal, candidates and evidence
-  H->>API: Review or edit; approve
+  H->>API: Review or edit, approve
   API->>G: Save deterministic outbox record
   W->>G: Claim with lease and owner
   W->>C: Search for existing task marker
