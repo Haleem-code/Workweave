@@ -14,13 +14,18 @@ credential vault is separate and holds provider/OAuth secrets, not company facts
 
 ## Actual labels and relationships
 
-All persisted nodes have the `Record` label plus a typed label such as `Entity`,
+Stored application records have the `Record` label plus a typed label such as `Entity`,
 `Source`, `Chunk`, `Person`, `Profile`, `Procedure`, `Run`, `Task`, `Episode`,
 `Conversation`, or `Message`. Stable `id`, `kind`, `active`, and `updated_at`
 properties support retrieval. Full records are serialized in `payload`.
 `Entity` additionally projects business fields such as `name`, `entity_type`,
 dates, stock, quantity, and owner for Cypher. `Chunk` projects searchable text
-and, when indexing succeeds, an embedding. A `Source` can be the current source
+and, when indexing succeeds, an embedding. Assignment projection nodes `Role` and
+`Responsibility` have stable IDs and graph properties rather than full `Record`
+payloads. `SlackEvent`, `TaskProposal`, `Outbox`, and `ExternalTask` are persisted
+record kinds. Canonical job state, attempts, owner, and lease timestamps are also
+projected onto job nodes; reads overlay those properties onto the payload.
+A `Source` can be the current source
 record or a historical version record; `is_version` is inside its payload.
 
 ```mermaid
@@ -35,6 +40,11 @@ flowchart LR
     NewVersion["New Source version"] -->|SUPERSEDES| Version
     Profile -->|HAS_PERSON| Person
     Person -->|SUPPORTED_BY| Chunk
+    Person -->|HAS_ROLE| Role
+    Role -->|RESPONSIBLE_FOR| Responsibility
+    Proposal[TaskProposal] -->|RECOMMENDS| Person
+    Proposal -->|PROPOSED| Event[SlackEvent]
+    ExternalTask -->|ASSIGNED_TO| Person
     Run -->|PRODUCED| Task
     Task -->|BASED_ON| Chunk
     Episode -->|BASED_ON| Run
@@ -78,6 +88,12 @@ task needs a finding from its own run with current evidence. The private stdio
 MCP server additionally binds tools to a user, company, and run.
 
 ## Queries and source files
+
+Assignment traverses confirmed, active, ClickUp-mapped people through stored role
+and responsibility nodes, joins their assigned external tasks, and returns real
+path IDs. Python scores the bounded query results; stale attached evidence is
+excluded. The outbox links to its proposal via a payload field, not an invented
+graph edge. See [architecture](architecture.md) for sequence and recovery diagrams.
 
 Read [graph-queries.cypher](graph-queries.cypher) for the actual traversal,
 ownership, expansion, retrieval, persistence, and indexing templates. The

@@ -131,7 +131,7 @@ export function Connections({ base, onDocuments, onInbox, onRoster }: { base: st
               <SlackIcon size={28} />
             </span>
             <span className={'connection-state ' + (status?.slack?.configured ? 'is-connected' : '')}>
-              {status?.slack?.configured ? 'Live Events Connected' : 'Not configured'}
+              {status?.slack?.configured ? 'Slack account connected' : 'Not configured'}
             </span>
           </div>
           <h2>Slack Real-Time Events</h2>

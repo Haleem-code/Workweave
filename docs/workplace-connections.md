@@ -1,141 +1,96 @@
-# Live Workplace Integrations: Slack & ClickUp
+# Slack and ClickUp connections
 
-Workweave connects directly to **Slack** and **ClickUp** to provide an intelligent, graph-driven work assignment pipeline:
+Workweave implements a reviewed pipeline: **signed Slack request → durable intake → graph-supported proposal → administrator approval → ClickUp task → Slack confirmation**.
 
-```mermaid
-flowchart TD
-    SlackMsg[Slack Message in Watched Channel] -->|Events API POST| Receiver[Events Webhook Receiver]
-    Receiver -->|HMAC-SHA256 & Route Check| Persist[Durable Event Ingestion in FalkorDB]
-    Persist -->|200 OK| SlackAck[Slack Delivery Acknowledged]
-    Persist -->|Worker Triage| AI[AI Triage & FalkorDB Graph Traversal]
-    AI -->|Roles, Responsibilities, Past Outcomes| Proposal[Staged Task Proposal]
-    Proposal -->|Admin Review & Override| Inbox[Task Inbox: Human-in-the-Loop]
-    Inbox -->|Approved by User| Outbox[Durable Outbox Queue]
-    Outbox -->|Reconcile Marker & Create| ClickUp[ClickUp Task Created]
-    Outbox -->|Thread Reply with Metadata| SlackReply[Slack Thread Confirmation]
-    ClickUp -->|Periodic Outcome Sync| OutcomeUpdate[FalkorDB Past Outcomes Updated]
+[Architecture](architecture.md) · [Demo video](media/workweave-demo-3m50s.mp4) · [Source](../workweave-api/workweave_api/integrations.py)
+
+## Verification status
+
+The complete pipeline is tested against **real disposable FalkorDB with controlled Slack/ClickUp HTTP responses**. In the public recording, Slack authentication succeeded as KoraBridge, but channel discovery returned `missing_scope`. No watched channel or live external dispatch was verified. ClickUp is shown at setup, not connected. A saved token or successful `auth.test` is not proof that event delivery, channel permissions and task creation all work.
+
+For the hackathon, use only your explicitly synthetic workspace/channel/list and event-permitted data. Do not connect unrelated private company information merely because you can access it.
+
+## Slack: connect an app you administer
+
+1. Create/select an app at [Slack API apps](https://api.slack.com/apps) for your synthetic workspace.
+2. Under **OAuth & Permissions → Bot Token Scopes**, configure the scopes needed by this implementation:
+
+   | Scope | Used for |
+   | --- | --- |
+   | `channels:read` | Public channel discovery |
+   | `groups:read` | Private channel discovery; the current picker requests both public and private channel types |
+   | `channels:history` | Public channel message access/events |
+   | `groups:history` | Private channel messages if you choose to use them |
+   | `users:read` | Optional author-name enrichment |
+   | `chat:write` | Confirmation after an approved task |
+
+3. Install/reinstall the Slack app after changing scopes. Save the resulting bot token privately in Workweave; adding a scope in the console alone is not enough.
+4. Under **Basic Information**, find the **Signing Secret** and **App ID**. The Signing Secret is different from the OAuth Client Secret.
+5. In **Workweave → Connections → Configure Slack**, enter the bot token, Signing Secret and optional App ID, then save. Never put tokens in the repository or documentation.
+6. Copy the generated request URL into **Slack → Event Subscriptions → Request URL**. Wait for Slack to show **Verified**:
+
+   ```text
+   https://workweave.fly.dev/api/v1/integrations/slack/events/<your-route-id>
+   ```
+
+7. Subscribe to `message.channels`, and to `message.groups` only when using private channels. Save changes and reinstall if Slack requires it.
+8. Invite the bot to your synthetic demonstration channel. Refresh channels in Workweave and explicitly choose which ones to watch. **Zero selected channels means zero monitored channels.**
+
+`WORKWEAVE_PUBLIC_BASE_URL` must be the externally reachable HTTPS backend URL. Local development needs an HTTPS tunnel or another reachable endpoint; Slack cannot call your laptop's localhost address.
+
+Changing the callback URL does not add OAuth scopes. If channel discovery still returns `missing_scope`, finish the scope/reinstall/token update before attempting event delivery.
+
+## ClickUp: choose a destination list
+
+1. In your own synthetic ClickUp workspace, obtain a personal API token through its API/app settings. Workweave currently uses administrator-supplied tokens, not a public multi-customer OAuth install.
+2. Open the destination **List** and obtain its numeric List ID. This is not a workspace name, username, Space ID or task ID.
+3. In **Connections → Configure ClickUp**, enter the token and List ID. Workweave checks access using the list endpoint.
+4. Open **Team Roster** and confirm each relevant person's role and responsibilities. Map the person to the correct numeric ClickUp user ID. A Slack identity can be recorded separately.
+5. Attach current supporting evidence when available. A manually confirmed uncited role remains a manual entry, not a claimed document extraction.
+
+## What happens after a request arrives
+
+A signed message in a watched channel is saved with a company-scoped event ID before acknowledgement. The worker later resolves the author, extracts proposed work and consults the assignment graph.
+
+```text
+Person → HAS_ROLE → Role → RESPONSIBLE_FOR → Responsibility
+ExternalTask → ASSIGNED_TO → Person
 ```
 
----
+Automatic candidates must be active, confirmed and ClickUp-mapped. The app scores responsibility overlap, similar on-time outcomes, overdue/reassigned work, and open workload. Actual stored graph path IDs and current attached evidence accompany recommendations. This is a bounded heuristic, not a promise of the optimal assignee.
 
-## 1. Architecture & Guarantees
+An administrator opens **Task Inbox**, reviews the original message, title, description and candidates, makes changes if needed, then selects **Approve & Create in ClickUp**. The integration worker does not create ClickUp tasks or send thread confirmations before approval.
 
-1. **Durable Ingestion Before Acknowledgement**: Every inbound Slack event is cryptographically verified (HMAC-SHA256 signature and 5-minute replay window) and durably written to the company store before the HTTP 200 response is returned. Duplicate delivery retries from Slack are deduplicated by `(channel, message_ts)`.
-2. **FalkorDB Graph-Driven Matching**: Assignees are not picked arbitrarily. FalkorDB traverses candidate roles, confirmed responsibilities, past on-time task outcomes, and active workload to calculate fit scores. Every recommendation links to source evidence chunks.
-3. **Strict Human-in-the-Loop Gate**: Zero tasks are created in ClickUp and zero Slack thread replies are sent until a workspace administrator reviews and approves the proposal in the **Task Inbox**.
-4. **Idempotent ClickUp Creation**: Every outbox entry carries an unguessable marker (`⟦workweave:{marker}⟧`). On any retry or crash recovery, Workweave searches ClickUp for the marker before issuing a `POST /task`. If the task already exists, it reconciles the existing ID rather than creating a duplicate.
-5. **Multi-Tenant Isolation**: Each company receives an isolated route ID (`/api/v1/integrations/slack/events/{route_id}`), encrypted vault credentials, exclusive channel claims, and independent ClickUp list destinations.
+## Recovery behaviour
 
----
+| Situation | Behaviour |
+| --- | --- |
+| Slack retries the same event | Deterministic company/event ID prevents duplicate intake |
+| Two workers compete for a job | A graph-side claim and lease owner gate job advancement |
+| ClickUp marker search fails or is incomplete | Creation is paused; failure is not treated as absence |
+| A create response is lost | Search for the existing marker; never blindly resend an uncertain create |
+| Task exists but graph receipt was interrupted | Reconcile the task ID and restore external-task memory |
+| Slack rejects a reply | Keep confirmation pending/failed and retry the reply as appropriate |
+| Prior Slack send is uncertain or history lookup is unavailable | Reconcile when possible; otherwise require attention rather than claiming completion |
+| Administrator retries a job with a known task ID | Continue confirmation without recreating the ClickUp task |
 
-## 2. Slack Setup Guide
+The marker is deterministic, not a secret. This is conservative recovery across separate systems, not an external exactly-once transaction guarantee. Outcome refresh currently uses bounded polling and limited status handling.
 
-### Step 1: Create Slack App
-1. Go to [api.slack.com/apps](https://api.slack.com/apps) and click **Create New App → From scratch**.
-2. Give your app a name (e.g. `Workweave Dispatcher`) and select your Slack workspace.
+## Troubleshooting
 
-### Step 2: Configure Scopes
-Navigate to **OAuth & Permissions → Scopes → Bot Token Scopes** and add:
-- `channels:history`: Read messages in public channels.
-- `groups:history`: Read messages in private channels.
-- `channels:read`: List public channels for selection.
-- `groups:read`: List private channels for selection.
-- `users:read`: Resolve author names and Slack user IDs.
-- `chat:write`: Post task confirmation replies back into Slack threads.
+| Symptom | Check |
+| --- | --- |
+| `missing_scope` | Required channel scopes, reinstall, and the token saved in Workweave |
+| Callback contains localhost | Set `WORKWEAVE_PUBLIC_BASE_URL` on the backend and reload connection status |
+| Slack URL is unverified | Public HTTPS reachability, correct route, Signing Secret and timestamp/signature verification |
+| No channels appear | Discovery scopes, app installation and channel access |
+| Messages never reach the inbox | Event subscriptions, bot invitation and explicit watched-channel selection |
+| No eligible assignee | Confirmed role/responsibility match, current evidence and ClickUp user mapping |
+| ClickUp returns 401 | Token validity and access to the selected numeric List ID |
+| Task exists but confirmation is pending | Slack write/history permissions and the saved delivery state; do not manually duplicate the ClickUp task |
 
-### Step 3: Install App & Copy Credentials
-1. Under **Install App**, click **Install to Workspace** and authorize permissions.
-2. Copy the **Bot User OAuth Token** (starts with `xoxb-...`).
-3. Under **Basic Information → App Credentials**, copy the **Signing Secret** and **App ID**.
+## Credentials and boundaries
 
-### Step 4: Configure in Workweave
-1. In Workweave, navigate to **Connections → Slack**.
-2. Paste the **Bot Token**, **Signing Secret**, and **App ID**, then click **Save & Connect Slack**.
-3. Workweave displays your unique **Request URL**:
-   ```text
-   https://<your-host>/api/v1/integrations/slack/events/<unique_route_id>
-   ```
-4. Copy this URL, return to Slack's **Event Subscriptions** page, toggle **Enable Events** to `On`, paste the URL into **Request URL**, and wait for the `Verified` badge.
-5. Under **Subscribe to bot events**, add `message.channels` and `message.groups`, then click **Save Changes**.
+Integration tokens and Signing Secrets are company-scoped in the backend's encrypted vault and are not returned by status APIs. API status is deliberately separate from end-to-end readiness. Protect the backend volume and vault key. Disconnecting clears the company's saved integration credentials and deactivates Slack routes; bootstrap settings do not silently restore an explicitly disconnected integration.
 
-### Step 5: Select Watched Channels
-In Workweave **Connections → Slack Channels**, browse all public and private channels the bot has access to. Toggle the channels you wish Workweave to monitor for work requests.
-
----
-
-## 3. ClickUp Setup Guide
-
-### Step 1: Retrieve Personal API Token
-1. In ClickUp, open your avatar menu → **Settings → Apps / ClickUp API**.
-2. Under **API Token**, generate or copy your personal token (starts with `pk_...`).
-
-### Step 2: Find Your Destination List ID
-1. Open the ClickUp Space and List where tasks should be created.
-2. In the browser URL bar or list share link, copy the numeric identifier:
-   - Example: `https://app.clickup.com/1234567/v/li/987654321` → List ID is `987654321`.
-
-### Step 3: Configure in Workweave
-1. In Workweave, open **Connections → ClickUp**.
-2. Paste your **ClickUp Token** and **List ID**, then click **Save & Connect ClickUp**.
-3. Workweave verifies access against ClickUp's `/api/v2/list/{id}` endpoint and displays your list name.
-
----
-
-## 4. Team Roster Setup
-
-Before assigning tasks, establish team identity mappings in **Team Roster** (`/` sidebar → **Team Roster**):
-
-1. **Add or Edit Member**:
-   - **Full Name**: e.g. `Sarah Jenkins`
-   - **Role**: e.g. `Backend Engineer`, `Frontend Lead`, `DevOps`
-   - **Responsibilities**: Detailed domain scope (e.g. `PostgreSQL, Redis caching, user authentication, billing pipelines`).
-   - **ClickUp Member**: Select or input the member's numeric ClickUp User ID.
-   - **Slack User ID**: Input the member's Slack handle / user ID (e.g. `U01234567`).
-   - **Evidence Citations**: Link to uploaded company documents that verify these responsibilities.
-2. **FalkorDB Synchronization**:
-   Saving updates the member's node and relations (`Person`, `Role`, `Responsibility`, `SUPPORTED_BY`) in FalkorDB, updating the assignment graph immediately.
-
----
-
-## 5. End-to-End Triage & Approval Flow
-
-1. **Inbound Message**:
-   A team member posts a request in a watched Slack channel:
-   > *"The user login endpoint is returning 500 errors when session cookies expire. Can someone patch the auth token validation?"*
-
-2. **AI Triage & Graph Traversal**:
-   - The background integration worker extracts key intent: Title (*"Fix session cookie expiration in auth endpoint"*), urgency, and required skills (*"auth", "login", "backend"*).
-   - FalkorDB assigns candidate scores by traversing:
-     - `Person -[:HAS_ROLE]-> Role`
-     - `Person -[:RESPONSIBLE_FOR]-> Responsibility`
-     - Past completed tasks with positive outcomes
-     - Open task penalty
-   - The top candidates are attached to a staged **Task Proposal**.
-
-3. **Human Approval in Task Inbox**:
-   - The administrator opens **Task Inbox** (`/` sidebar → **Task Inbox**).
-   - Review the Slack message context, AI title/description draft, and recommended assignee.
-   - Click the evidence panel to review *"Why this person"* with citations to source documents.
-   - Adjust the title or switch to a runner-up candidate if desired.
-   - Click **Approve & Create in ClickUp**.
-
-4. **Task Creation & Thread Confirmation**:
-   - Workweave claims the outbox entry with an atomic lease.
-   - Reconciles ClickUp via `⟦workweave:{marker}⟧` marker search to guarantee zero duplicate tasks.
-   - Creates the task in ClickUp assigned to the chosen member.
-   - Posts a confirmation message in the Slack thread with a direct link to the new ClickUp ticket:
-     > *✅ Task created in ClickUp and assigned to **Sarah Jenkins**:*
-     > *<https://app.clickup.com/t/8695pabc|Fix session cookie expiration in auth endpoint>*
-
-5. **Outcome Synchronization**:
-   - Workweave periodically queries ClickUp for task status updates.
-   - Completed tasks update the assignee's historical track record in FalkorDB, improving future AI triage accuracy.
-
----
-
-## 6. Security & Credential Isolation
-
-- **Zero Clear-Text Secrets**: Slack tokens, signing secrets, and ClickUp tokens are stored using company-scoped encrypted vaults and never returned in API GET responses.
-- **5-Minute Replay Protection**: Inbound Slack requests must have timestamps within 300 seconds of local time to prevent replay attacks.
-- **Unguessable Webhook Routes**: Webhook URLs use 128-bit cryptographically random tokens (`/events/{route_id}`). Requests to nonexistent or inactive route IDs are rejected.
-- **Conflict Prevention**: Channels can only be claimed by one company workspace at a time.
+The earlier read-only snapshot adapters remain in [`connections.py`](../workweave-api/workweave_api/connections.py). They are a separate preview/confirm import path. The current Connections screen focuses on live event/assignment setup; older snapshot screenshots and demo buttons do not describe the current interface.

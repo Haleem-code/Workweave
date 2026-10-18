@@ -1,151 +1,133 @@
 # Workweave
 
-**Ask your company a question. Follow the evidence. Keep the next step accountable.**
+### Company knowledge that connects to coordinated work.
 
-![FalkorDB](https://img.shields.io/badge/Graph-FalkorDB-365b46)
-![Track](https://img.shields.io/badge/Graph_Hacks-Company_Brain-365b46)
-![Stack](https://img.shields.io/badge/Stack-Next.js_%2B_FastAPI-272c27)
+Ask a company question. Follow the evidence. Understand what a change affects. Keep the next step—and its outcome—in memory.
 
-Workweave turns company documents and spreadsheets into a shared company brain.
-It connects accepted facts, responsibilities, operational dependencies, and past
-outcomes in **FalkorDB**, so answers can point back to their sources.
+[![FalkorDB](https://img.shields.io/badge/Graph-FalkorDB-355B47)](https://www.falkordb.com/)
+![Stack](https://img.shields.io/badge/Stack-Next.js_·_FastAPI-172B22)
+![Track](https://img.shields.io/badge/Graph_Hacks-Company_Brain-355B47)
 
-Think of it as a company notebook that can answer, “Who owns this?”, explain why a
-change matters, and remember what your team did about it.
+**[Open the live app](https://workweave-web.fly.dev) · [Watch the demo](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4) · [Read the build story](docs/workweave-blog.md) · [Try a company pack](docs/testing/README.md)**
 
-**Graph Hacks track: Company Brain.**
+Workweave connects documents, people, responsibilities, operational dependencies, and remembered outcomes in **FalkorDB**. It helps a team answer three practical questions:
 
-[Open Workweave](https://workweave-web.fly.dev) · [Try the company packs](docs/testing/README.md) · [Connect Slack / ClickUp](docs/workplace-connections.md) · [Graph model](docs/graph-model.md) · [Cypher queries](docs/graph-queries.cypher) · [Project story](docs/workweave-blog.md)
+- **What do we know?** Ask about current company documents and inspect the cited source.
+- **What does this change affect?** Follow recorded dependencies, check dates and stock, and explain which commitments need attention.
+- **Who should act next?** Review a graph-supported task proposal before approving an external action.
 
-**Demo video:** the 3:30 walkthrough has been recorded locally. Its public viewing
-link is still required before submission. A workplace-connection scene will be
-added after testing the participant's synthetic Slack and ClickUp accounts.
+**Named submission track: Company Brain.** Persistent memory, internal handoffs, and connected-data actions support that central company knowledge workflow.
 
-> **Build-history disclosure:** an earlier version of this repository described a
-> pre-event prototype. That history is preserved in the [submission disclosure](docs/submission-disclosure.md).
-> This README does not claim that the existing graph implementation was first
-> written during the event, or that eligibility has been confirmed.
+## Watch the working app · 3 minutes 50 seconds
 
-## The problem it solves
+[![Watch the complete Workweave demo](docs/images/demo-poster.jpg)](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4)
 
-A company can have a delivery procedure in one document, a purchase order in a
-spreadsheet, and the responsible team somewhere else. Finding a relevant paragraph
-is useful, but it does not establish which commitments depend on a delayed order.
+**[Play/download MP4](https://raw.githubusercontent.com/Haleem-code/Workweave/main/docs/media/workweave-demo-3m50s.mp4) · [Repository video file](docs/media/workweave-demo-3m50s.mp4) · [Captions](docs/media/workweave-demo-3m50s.srt)**
 
-Workweave supports two connected paths:
+The complete video is included in this repository: **1080p, 30 fps, synthetic narration, captions, and 230 seconds**. If your Markdown reader does not play MP4 inline, use the direct video link or download it. The public links become available when these files are pushed to the repository's `main` branch.
 
-- **Company questions:** upload a profile, procedure, or report; review what was
-  imported; ask a question; open the source behind the answer.
-- **Operational investigations:** import supported structured records; detect a
-  supplier delivery change; trace affected commitments; identify their owners;
-  create internal review tasks; retain the investigation and its outcome.
+| Time | What you see |
+| --- | --- |
+| 0:00–0:32 | The problem and company onboarding |
+| 0:32–1:00 | Document preview, confirmation, and company context |
+| 1:00–1:35 | An answer, its citation, a missing fact, and conversation history |
+| 1:35–2:25 | A supplier-delay investigation, exclusions, ownership, and handoff |
+| 2:25–2:50 | Task completion and an outcome that survives refresh |
+| 2:50–3:25 | KoraBridge Slack authentication, event setup, roster, Task Inbox, and ClickUp setup |
+| 3:25–3:50 | FalkorDB architecture and closing |
 
-For example, the included late-shipment scenario follows recorded dependencies
-to four customer orders. Two need review; two are excluded because of their dates
-or available stock. A fifth order is outside those paths and is not assessed.
-The explanation shows the evidence and the limits of the investigation.
+**Recording scope:** Slack authenticated successfully as KoraBridge. Channel discovery still returned `missing_scope`, so live channel monitoring is labelled pending. ClickUp is shown as setup-only; no live ClickUp task or live Slack-to-ClickUp dispatch is claimed. The automated integration tests exercise that complete flow with real FalkorDB and controlled external API responses.
 
-## Try it in a few minutes
+## One change. A useful explanation.
 
-1. Open [the app](https://workweave-web.fly.dev) and create an email/username account.
-   Choose your work area, starting focus, and workspace name.
-2. Pick one fictional company below. Upload its three documents individually,
-   preview them, and confirm the imports.
-3. Review **People & roles** and **Company**. Correct the suggestions before saving.
-4. Open **Ask**. Start with the suggested question, then open its source citation.
-5. Use **History** to revisit a conversation after refreshing or signing back in.
+In the included **Harbor Supply** example, a supplier shipment moves to October 23. Workweave follows the purchase order's recorded dependencies and checks the actual commitments:
 
-The industry form adjusts setup guidance. It does not generate an entire custom
-application or infer responsibilities that were never provided.
-
-### Four prepared company packs
-
-All four companies, their people, figures, and events are synthetic. Each folder
-contains a searchable PDF company profile, a Markdown procedure, and a text report.
-
-| Company | Documents | Try asking |
+| Commitment | Result | Why |
 | --- | --- | --- |
-| KoraBridge Logistics | [Delivery operations pack](docs/01_korabridge_logistics/) | Who owns Project Atlas and what are its budget and target date? |
-| Sunvale Energy Systems | [Solar-project pack](docs/02_sunvale_energy/) | Who owns Project Lumen and which site is blocked? |
-| Cedargrain Foods | [Production and quality pack](docs/03_cedargrain_foods/) | Who can release CGF-LOT-410, and is a release date confirmed? |
-| Meridian Harbor Software | [Software operations pack](docs/04_meridian_harbor_software/) | Who owns Atlas, when is it planned, and has it shipped? |
+| SO1 · Acme cartons | Needs review | Its required date precedes the new arrival; stock is insufficient |
+| SO2 · Beacon cartons | Needs review | Its required date also precedes the new arrival |
+| SO3 · Later cartons | Excluded | Its required date is after the new arrival |
+| SO4 · Tape with stock | Excluded | Available unallocated stock covers the order |
+| SO5 · Unrelated tools | Not assessed | It is outside this purchase order's dependency paths |
 
-Use a **separate workspace for each company**. Download the files from the
-repository and upload the three actual documents, rather than their folder or ZIP.
+The result is more than a list of matching records: it includes paths, supporting evidence, the responsible team, internal review tasks, and a remembered outcome. **A graph connection identifies a candidate; dates, quantities, stock, and current evidence determine the finding.**
 
-The [testing guide](docs/testing/README.md) includes **24 questions** and a separate
-answer key. Keep the reviewer questions and answers outside Workweave: uploading
-the answer key would invalidate the test. Repeated names and project names help
-check that companies' knowledge stays separate. Missing facts test whether the
-app admits that it does not know.
+This example is explicitly deterministic. It demonstrates the real graph workflow without presenting a scripted result as an LLM response.
 
-Narrative documents test source-grounded answers. They do not automatically create
-all the typed order/supplier relationships used by the operational workflow.
+## Architecture
 
-### Connect work where it happens
+```mermaid
+flowchart TB
+  subgraph Client[Company workspace]
+    UI[Next.js and React UI]
+    Proxy[Same-origin API proxy]
+    UI --> Proxy
+  end
+  Proxy --> API[FastAPI: authentication and membership checks]
+  API --> Control[(FalkorDB control graph)]
+  API --> Tenant[Select authorized company graph]
+  Tenant --> Company[(FalkorDB company graph)]
 
-Open **Connections** in the company sidebar. Select **Slack** or **ClickUp**, enter
-the credential privately, and choose one fictional demo channel or task list.
-**Read & preview → Confirm & import → Ask with source evidence.**
+  Files[Documents and spreadsheets] --> Review[Parse → Preview → Confirm]
+  API --> Review
+  Review --> Company
+  Review --> Embed[Optional self-hosted Ollama embeddings]
+  Embed --> Company
 
-**No accounts or tokens for a quick test:** choose **Try Slack demo data** or
-**Try ClickUp demo data**. Review and confirm the fictional messages/tasks. These
-fixtures are labelled synthetic and do not show a live connection as successful.
+  API --> Retrieval[Current evidence: exact, full-text, vector and graph retrieval]
+  Retrieval <--> Company
+  Retrieval --> Answer[Source-grounded answers]
+  Answer --> LLM[Ollama Cloud by default; configured fallbacks]
+  API --> Investigation[Investigator → Response coordinator]
+  Investigation --> MCP[Reviewed tools / private stdio MCP]
+  MCP <--> Company
 
-![Workweave Connections: Slack and ClickUp sources with separate demo-data options](docs/images/connections.png)
+  Slack[Slack Events API] --> Verify[Verify signature, route and watched channel]
+  Verify --> Inbox[Persist event before acknowledgement]
+  Inbox --> Company
+  Company --> Worker[Integration worker: triage and graph matching]
+  Worker --> Proposal[Task Inbox: human review]
+  Proposal -->|Administrator approves| Outbox[Durable outbox and lease]
+  Outbox -->|Reconcile before create| ClickUp[ClickUp destination list]
+  Outbox --> Reply[Slack thread confirmation]
+  ClickUp --> Outcomes[Periodic status and outcome refresh]
+  Outcomes --> Company
+  API --> Vault[Encrypted credentials on backend volume]
+```
 
-| Tool | Credential | What this version reads |
-| --- | --- | --- |
-| Slack | Bot token + public channel ID | Up to 15 recent top-level text messages |
-| ClickUp | Personal token + list ID, for your own demo account | Up to 15 tasks, with names, status, assignees, and descriptions |
+The browser never receives provider secrets from the backend. Company facts and workflow state live in FalkorDB; the separate encrypted vault holds credentials. The hosted frontend and backend run as two Fly apps from this monorepo.
 
-Tokens stay encrypted on the backend and are not stored in company graph payloads.
-Nothing is posted back to either tool. Re-read a selected source when you want a
-new snapshot; this release has no scheduled sync or webhooks. Content enters
-company knowledge only after you confirm its preview. A workspace-tool snapshot
-does not automatically create typed supplier/order dependencies.
+For an ordinary question, current evidence is retrieved before answering. Relationship-dependent investigations use reviewed tools. Slack triage is a separate background workflow; it does not require the model to generate database queries.
 
-The adapters and demo mode are tested with controlled API responses. Real-account
-verification is pending the participant's connection of their synthetic workspace.
-Free-plan setup, permissions, limits, and disconnection are explained in the
-[connection guide](docs/workplace-connections.md). Public multi-customer OAuth
-onboarding is future work; this version uses administrator-supplied demo tokens.
+**[Detailed architecture and sequence diagrams](docs/architecture.md) · [Graph model](docs/graph-model.md) · [Cypher catalogue](docs/graph-queries.cypher)**
 
-## Why FalkorDB is essential
+## The graph does real work
 
-FalkorDB is the application's primary store, not a graph drawn over another
-business database. It holds accepted company knowledge, source versions, search
-indexes, people, conversations, investigations, tasks, and memory.
+There is one `ww_control` graph for accounts, memberships, policies, and integration routes. Each company has its own `ww_company_<identifier>` knowledge graph. Membership checks select the tenant graph; private conversation and episode access also checks the user.
 
 ```mermaid
 flowchart LR
-    Order[Customer commitment] -->|DEPENDS_ON| PO[Purchase order]
-    PO -->|DEPENDS_ON| Supplier[Supplier]
-    Order -->|OWNED_BY| Team[Responsible team]
-    Order -->|SUPPORTED_BY| Evidence[Source version]
-    Run[Investigation] -->|PRODUCED| Task[Review task]
-    Episode[Remembered outcome] -->|BASED_ON| Run
+  Order[SalesOrder] -->|DEPENDS_ON| PO[PurchaseOrder]
+  PO -->|DEPENDS_ON| Supplier[Supplier]
+  Order -->|OWNED_BY| Team[Responsible team]
+  Order -->|SUPPORTED_BY| Version[Source version]
+  Source[Current source] -->|HAS_CHUNK| Chunk[Evidence chunk]
+  Chunk -->|SUPPORTED_BY| Version
+  Person -->|HAS_ROLE| Role
+  Role -->|RESPONSIBLE_FOR| Responsibility
+  Person -->|SUPPORTED_BY| Chunk
+  Proposal[TaskProposal] -->|RECOMMENDS| Person
+  Proposal -->|PROPOSED| Event[SlackEvent]
+  External[ExternalTask] -->|ASSIGNED_TO| Person
+  Run[Investigation] -->|PRODUCED| Task[Internal review task]
+  Episode[Remembered outcome] -->|BASED_ON| Run
 ```
 
-The operational tool follows recorded dependency paths, then checks dates,
-quantities, current evidence, and unallocated stock. The model does not invent
-joins or write arbitrary Cypher. Removing FalkorDB stops company retrieval,
-investigations, and persistent memory; there is no substitute business-data store.
+Removing FalkorDB removes retrieval, dependency traversal, assignment paths, conversations, persisted jobs, and memory. There is no alternate business database that keeps these workflows running.
 
-There is one control graph, `ww_control`, and a separate knowledge graph per
-company, named `ww_company_<identifier>`. Membership checks select the graph before
-search or tool execution. Conversations and private episodes also check the author.
+### Example: explain an impact
 
-Actual labels, properties, relationships, tenant boundaries, and memory handling
-are documented in the [graph model](docs/graph-model.md). All stored nodes have a
-`Record` label plus their typed label; full record data is in `payload`, with
-queryable business fields also projected onto `Entity` nodes.
-
-### A core query
-
-This is the candidate traversal from `trace_impact`. `$id` must resolve to a
-current entity before execution. Application checks determine actual impact;
-connectivity alone is not treated as a disruption.
+The application uses this bounded, parameterized dependency traversal before applying its business checks:
 
 ```cypher
 MATCH path=(o:Entity {entity_type:'SalesOrder',active:true})
@@ -158,173 +140,166 @@ RETURN DISTINCT o.payload AS order_json, po.payload AS po_json,
 ORDER BY o.required_date
 ```
 
-See [the query catalogue](docs/graph-queries.cypher) for ownership, graph expansion,
-full-text search, vector search, persisted-state lookup, and indexing templates,
-with links to their implementations in the [graph model](docs/graph-model.md).
+### Example: find eligible assignees
 
-## Architecture
-
-```mermaid
-flowchart TB
-    Browser[Browser workspace: Next.js and React] -->|Same-origin API proxy| API[FastAPI]
-    Files[Uploaded documents and spreadsheets] --> Preview[Parse, preview, confirm]
-    Workplace[Selected Slack channel / ClickUp list] --> Snapshot[Read-only API snapshot]
-    Snapshot --> Preview
-    API --> Preview
-    Preview --> Graph[(FalkorDB)]
-    Preview --> Embeddings[Self-hosted Ollama embeddings]
-    Embeddings --> Graph
-    API --> Retrieval[Exact, full-text, vector, and graph retrieval]
-    Retrieval <--> Graph
-    API --> Executor[Investigator and response coordinator]
-    Executor --> Tools[Reviewed tools and private stdio MCP]
-    Tools <--> Graph
-    Executor --> Models[Permitted answer provider]
-    Models --> Cloud[Ollama Cloud by default]
-    Models --> Other[Optional configured providers]
-    Executor --> State[Checkpoints, internal tasks, and outcomes]
-    State --> Graph
+```cypher
+MATCH path=(person:Person)-[:HAS_ROLE]->(role:Role)
+  -[:RESPONSIBLE_FOR]->(responsibility:Responsibility)
+WHERE person.active=true AND person.confirmed=true AND person.clickup_id <> ''
+  AND any(term IN $terms
+    WHERE toLower(role.name + ' ' + responsibility.text) CONTAINS term)
+OPTIONAL MATCH (task:ExternalTask)-[:ASSIGNED_TO]->(person)
+RETURN person.payload AS person, [n IN nodes(path) | n.id] AS path_ids,
+  collect(task.payload) AS tasks
+LIMIT 200
 ```
 
-The hosted frontend and backend are separate Fly apps. The browser uses the
-frontend's API proxy; backend writes accept only the configured frontend origin.
-Keys stay on the backend. Its persistent volume holds encrypted provider/OAuth
-credentials, while company knowledge and application state live in FalkorDB.
+FalkorDB performs candidate and task-ownership joins and returns actual stored path IDs. Python scores the bounded results using responsibility overlap, similar on-time outcomes, overdue/reassigned outcomes, and current workload. Stale attached document evidence is excluded. Confirmed manual roles are possible; an uncited manual entry is not represented as a document-derived fact.
 
-For ordinary questions, the backend retrieves current evidence and generates a
-source-grounded answer. Some narrow facts can be answered directly. Requests
-requiring relationship tools use the bounded tool loop. The private MCP catalogue
-contains `search_knowledge`, `trace_impact`, `find_owner`, `get_procedure`,
-`recall_episode`, and `create_review_task`.
+## Memory that survives the conversation
 
-Semantic memory stores accepted facts; episodic memory stores investigations and
-outcomes; procedural memory stores approved procedure versions. Handoffs and
-checkpoints are persisted. One background executor coordinates the workflow;
-this is not a distributed multi-agent concurrency system.
+| Memory | Stored context | What it enables |
+| --- | --- | --- |
+| Semantic | Accepted records, company facts, people, roles, current evidence | Answers grounded in the company's knowledge |
+| Episodic | Conversations, investigations, findings, tasks, outcomes | Returning to what happened and what was done |
+| Procedural | Approved, versioned procedures | Consulting the current process during an investigation |
+| Coordination state | Run checkpoints, handoff payloads, proposals, inbox/outbox jobs and delivery receipts | Continuing work after interruption and reviewing responsibility |
+
+An internal investigator-to-coordinator handoff is stored in the investigation's payload and event log. This is a bounded application workflow, not a claim of independently deployed autonomous agents or production-scale multi-agent throughput.
+
+## Try it with four fictional companies
+
+1. [Open Workweave](https://workweave-web.fly.dev) and create an email/username account; Google sign-in is optional.
+2. Choose your work area and starting focus. Onboarding personalizes guidance, rather than inventing business facts or generating a different application.
+3. Upload the three files from one company pack, preview them, and confirm each import.
+4. Review **Company** and **People & roles**, then ask a question and open its citation.
+5. Refresh and use **History** to revisit the conversation. Use a separate workspace for each company.
+
+| Synthetic company | Pack | A useful first question |
+| --- | --- | --- |
+| KoraBridge Logistics | [Delivery operations](docs/01_korabridge_logistics/) | Who owns Project Atlas, and what are its budget and target date? |
+| Sunvale Energy Systems | [Energy projects](docs/02_sunvale_energy/) | Who owns Project Lumen, and which site is blocked? |
+| Cedargrain Foods | [Production and quality](docs/03_cedargrain_foods/) | Who can release CGF-LOT-410, and is a release date confirmed? |
+| Meridian Harbor Software | [Software operations](docs/04_meridian_harbor_software/) | Who owns Atlas, when is it planned, and has it shipped? |
+
+The packs contain a searchable PDF profile, Markdown procedure, and text report. The [reviewer guide](docs/testing/README.md) supplies 24 questions and a separate answer key. **Do not upload the questions or answer key into the app.** Reused names help test tenant isolation; deliberately absent facts test whether the assistant admits missing information.
+
+Narrative documents test company answers. Operational supplier/order dependencies require supported structured mappings; uploading an arbitrary paragraph does not create a complete operational graph.
+
+For the dependency demo, choose **Home → Try the example**. It creates a separate Harbor Supply workspace, keeping the current company separate.
+
+## Connect Slack and ClickUp
+
+**Slack:** connect a bot token, Signing Secret, and optional App ID in **Connections**. Copy the public HTTPS request URL into Slack Event Subscriptions, subscribe to the relevant message events, invite the bot, and select only your synthetic demo channels. **Selecting no channels monitors none.**
+
+**ClickUp:** connect a personal API token and the numeric destination list ID. In **Team Roster**, confirm responsibilities and map eligible people to their ClickUp user IDs. An administrator then reviews **Task Inbox → Approve & Create in ClickUp**.
+
+```mermaid
+sequenceDiagram
+  participant S as Slack
+  participant API as FastAPI
+  participant G as FalkorDB
+  participant W as Integration worker
+  participant H as Workspace administrator
+  participant C as ClickUp
+  S->>API: Signed message event
+  API->>API: Verify route, signature, team and watched channel
+  API->>G: Persist event once
+  API-->>S: Acknowledge
+  W->>G: Claim event; traverse assignment graph
+  W->>G: Save proposal, candidates and evidence
+  H->>API: Review or edit; approve
+  API->>G: Save deterministic outbox record
+  W->>G: Claim with lease and owner
+  W->>C: Search for existing task marker
+  alt Existing task found
+    C-->>W: Reconcile its task ID
+  else Complete search and no prior uncertain create
+    W->>C: Create approved task
+  else External outcome is uncertain
+    W->>G: Pause instead of blindly recreating
+  end
+  W->>G: Save external task and delivery state
+  W->>S: Thread confirmation
+  W->>G: Save receipt and completion state
+```
+
+Retries reconcile existing tasks, and stale workers cannot advance jobs after losing ownership. If a write may have succeeded but its response was lost, the worker does not blindly send it again. Failed Slack confirmation remains pending/failed; a created ClickUp task is retained. These safeguards reduce duplicate writes; they are **not an exactly-once guarantee from external APIs**.
+
+**[Permissions, setup, troubleshooting and current limits](docs/workplace-connections.md)**
 
 ## Run locally
 
-Requirements: Docker with Linux containers and an available port **8080**.
-Run these commands from the repository root.
+Requirements: Docker with Linux containers, an available port **8080**, and a configured answer provider if you want model-generated answers.
 
-**First-time configuration only:** if you do not already have `.env`, copy
-`.env.example` to `.env` and set your own bootstrap administrator password. Keep
-existing configuration and credentials; do not overwrite them with an example.
+From the repository root, **only if `.env` does not already exist**, copy `.env.example` to `.env`. Set your own bootstrap admin password and provider configuration privately. Never overwrite existing configuration or commit credentials.
 
 ```bash
 docker compose up -d --build
 docker compose exec ollama ollama pull embeddinggemma:300m
 ```
 
-Open **http://localhost:8080** and create an account. The bootstrap `admin` account
-is for platform administration; its initial password is used only when that
-account is first created.
+Open **http://localhost:8080** and create an account. The stack starts the frontend, API, local FalkorDB, and Ollama. Application defaults prefer **Ollama Cloud (`gemma4:31b`)**, followed by enabled/configured **Groq → Gemini → self-hosted Ollama** fallbacks. Provider policy can restrict those choices.
 
-The app-wide default starts with **Ollama Cloud** (`gemma4:31b`), then tries configured **Groq → Gemini → self-hosted Ollama** fallbacks when needed. New accounts and workspaces inherit that default. Configure
-`WORKWEAVE_OLLAMA_CLOUD_KEY` on the backend, or use the
-[hidden-key setup helper](docs/ollama-cloud.md). The embedding model above remains
-separate from cloud chat.
+Set `WORKWEAVE_OLLAMA_CLOUD_KEY` privately on the backend. Chat and embeddings are separate: semantic document indexing uses `embeddinggemma:300m` from the configured self-hosted Ollama service. Without embeddings, exact/full-text and confirmed graph retrieval remain available with semantic search reported as degraded.
 
-For a fully local answer model, also run:
+For fully local chat:
 
 ```bash
 docker compose exec ollama ollama pull qwen3:8b
 ```
 
-Then select **Settings → AI answers → Self-hosted Ollama → Save preferences**.
-A hosted answer provider requires its own account, credentials, and available
-quota. Existing workspaces retain their saved provider preferences.
+Then select self-hosted Ollama in **Settings → AI answers** and save preferences.
 
-Already have FalkorDB Cloud? Follow [cloud setup](docs/cloud-setup.md) and use
-`docker compose -f docker-compose.cloud.yml up -d --build`. Do not start both
-Compose profiles against different database endpoints unintentionally.
-
-### Repeatable graph-workflow demo
-
-From **Home**, click **Try the example**. Workweave creates a separate fictional
-Harbor Supply workspace and prepares its investigation in the background. The
-saved preparation job can recover after interruption. Your existing company is
-kept separate. For a command-line alternative, create a password-based account
-first, then run:
+Already using FalkorDB Cloud? Configure the host, port, credentials, and TLS privately, follow [cloud setup](docs/cloud-setup.md), and use this alternative instead of the local Compose stack:
 
 ```bash
-python scripts/run-graph-demo.py --url http://localhost:8080
+docker compose -f docker-compose.cloud.yml up -d --build
 ```
 
-The helper prompts for your login without displaying the password and creates a
-fresh **Harbor Supply** workspace through the real API. It imports synthetic
-records, moves a purchase-order delivery date, and verifies that **SO1 and SO2**
-are affected and two internal review tasks were saved. **SO3 and SO4** are checked
-and excluded with date/stock evidence. **SO5** is outside the recorded dependency
-paths and is not assessed by this investigation.
-No chat-model key is required for this explicitly labelled deterministic graph
-scenario. It is not a fabricated model response.
+For local Slack events, configure a reachable HTTPS callback/tunnel. A localhost URL cannot receive Slack's hosted webhook deliveries.
 
-Open the new workspace in the browser. Inspect the investigation in **Home**,
-follow its dependency path and source citations, complete a task, and revisit
-**Company → Past decisions**. See the [testing guide](docs/testing/README.md).
+## Deployment and verification
 
-## Deployment and current limits
+| Component | Location |
+| --- | --- |
+| Frontend | [workweave-web.fly.dev](https://workweave-web.fly.dev) |
+| Backend health | [workweave.fly.dev/api/v1/health](https://workweave.fly.dev/api/v1/health) |
+| Frontend source | [`workweave-web/`](workweave-web/) |
+| Backend source | [`workweave-api/`](workweave-api/) |
+| Deployment guides | [Frontend/Google](docs/fly-frontend.md) · [Backend](docs/fly-backend.md) |
 
-- **Frontend:** https://workweave-web.fly.dev
-- **Backend health:** https://workweave.fly.dev/api/v1/health
-- **Deployment:** [frontend and Google setup](docs/fly-frontend.md), [backend setup](docs/fly-backend.md).
+From the repository root, these deploy the two apps:
 
-The public frontend, API proxy, hostname/origin checks, and Google callback URL
-have been checked. Password sign-up, onboarding, document questions, and an
-authenticated Ollama Cloud answer were exercised in the live browser audit.
-A complete Google sign-in still needs separate consent verification. Hosted
-embedding service verification is separate from a successful health check.
+```bash
+fly deploy ./workweave-api -a workweave
+fly deploy ./workweave-web -a workweave-web
+```
 
-Uploads support CSV, XLSX, text-based PDF, DOCX, Markdown, and text, up to 10 MB per
-file. There is no OCR for scanned PDFs. Confirmed operational entity types are
-Supplier, Product, PurchaseOrder, SalesOrder, Team, and general BusinessRecord.
-Role suggestions support limited patterns and need review.
+GitHub pushes deploy automatically only if the corresponding integration/workflow is configured. Configure secrets in Fly, and set `WORKWEAVE_PUBLIC_BASE_URL` to the backend's public HTTPS URL.
 
-Slack and ClickUp support selected, read-only snapshots through **Connections**.
-Continuous synchronization, threaded replies, attachments, automatic rider tracking,
-and external task updates are not implemented. A snapshot must be reviewed and
-confirmed. Internal review tasks do not send emails or notify customers.
+**Latest complete backend verification: 57 tests passed** in a Linux container against disposable real FalkorDB. External Slack/ClickUp HTTP responses were controlled, not live-account writes. Coverage includes real assignment paths, stale-source exclusion, atomic claims, parallel workers, ambiguous external responses, approval gating, reply retries, tenant isolation, private MCP, source versions, and recovery. The frontend production build and TypeScript check passed.
 
-Document embeddings use `embeddinggemma:300m` through a reachable self-hosted
-Ollama service. Missing embeddings degrade semantic search; exact/full-text and
-confirmed graph retrieval remain available. A hosted deployment must provision
-that service separately. Model latency, quotas, and answer quality vary. Citations
-support review but do not guarantee every generated claim or calculation is correct.
+**[Reproduce the tests](docs/development-and-demo.md) · [Verification record](docs/submission-audit.md)**
 
-## Verification
+### Current boundaries
 
-The latest isolated backend run passed **40 tests**. Coverage includes current
-source versions, dependency exclusions with evidence, task and interrupted-example
-recovery, tenant/private-history boundaries, scoped MCP tools, provider policies,
-malformed model names, and hostile-origin rejection. The frontend production build
-and TypeScript check passed. Browser audits use new synthetic accounts and company
-data to exercise onboarding, imports, citations, history, task outcomes, mobile
-layout, and the example investigation. See the [audit report](docs/submission-audit.md)
-for the live results and remaining gaps.
+- The recorded live integration verifies Slack authentication, not completed channel monitoring or live ClickUp dispatch.
+- The token-based integration is administrator configured; public multi-customer OAuth installation is future work.
+- The worker uses bounded batches and polling; high-throughput, multi-region operation has not been benchmarked.
+- Google consent and hosted embedding availability require their own checks. A health response does not prove every provider or connector is ready.
+- Supported uploads: CSV, XLSX, text-based PDF, DOCX, Markdown, and text, up to 10 MB each. Scanned-PDF OCR is not implemented.
+- Suggested roles require review. External tool messages are untrusted input; model output does not grant permissions.
+- No automatic rider telemetry, universal company connector, or arbitrary document-to-operational-schema inference is claimed.
 
-The later workplace-tool addition passed **3 isolated connector tests**. Both
-synthetic imports were also confirmed and saved through the live interface.
-These are additional checks; the full database suite was not rerun after the
-connector changes.
+## Submission, data and authorship
 
-For developer test instructions and the recording walkthrough, see
-[development and demo](docs/development-and-demo.md). These checks are not a
-production-scale benchmark or a claim that all 24 company-pack answers passed.
+**Track: Company Brain.** The submission includes source, setup instructions, the graph model, core queries, a complete demo video, and a live app. Use only synthetic or otherwise event-permitted data for judging.
 
-## Submission and authorship
+**AI assistance:** OpenAI Codex assisted with implementation, fixes, tests, deployment, documentation, and video preparation. The participant directed the product, company scenarios, integrations, and acceptance feedback. Narration is synthetic, using Microsoft Sonia through Edge TTS. The submitter must understand and explain the submitted code and design.
 
-The named submission track is **Company Brain**. Persistent memory and internal
-coordination support the product, but this README does not enter additional tracks
-or claim high-concurrency multi-agent execution.
+**Build history:** earlier documentation described a pre-event prototype. That disclosure is preserved in [submission history](docs/submission-disclosure.md); this README does not assert that all implementation began during the event or that eligibility has been confirmed. The [organizer's rules](https://www.wemakedevs.org/hackathons/falkordb/rules) govern eligibility.
 
-**AI assistance disclosure:** OpenAI Codex assisted with implementation,
-troubleshooting, tests, deployment, and documentation. The participant supplied
-the product direction, company scenarios, and acceptance feedback. The submitter
-must review the code and be able to explain the graph model, queries, architecture,
-and technical choices; use of an assistant is not a substitute for that understanding.
+## Explore the implementation
 
-See [submission disclosure and checklist](docs/submission-disclosure.md) for the
-existing prototype history, event changes, data policy, and outstanding deliverables.
-The demo video is still pending, and pre-event implementation history must be
-resolved against the [organizer's rules](https://www.wemakedevs.org/hackathons/falkordb/rules).
+[Architecture](docs/architecture.md) · [Graph model](docs/graph-model.md) · [Cypher](docs/graph-queries.cypher) · [Integrations](docs/workplace-connections.md) · [Company packs](docs/testing/README.md) · [Build story](docs/workweave-blog.md)

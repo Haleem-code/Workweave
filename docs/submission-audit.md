@@ -1,3 +1,16 @@
+# Latest verification — October 18, 2026
+
+- **57 backend tests passed** in a Linux container with disposable real FalkorDB and controlled external API responses. Real graph assignment, concurrent claims, duplicate prevention, approval gating, ambiguous external responses, and reply retries are covered.
+- The frontend production build and TypeScript check passed.
+- The complete **3:50, 1920×1080, 30 fps** [video](media/workweave-demo-3m50s.mp4) decoded successfully from start to finish. [Captions](media/workweave-demo-3m50s.srt) and [media verification](media/video-verification.json) are included.
+- Slack authentication succeeded for the synthetic KoraBridge workspace. Channel discovery returned `missing_scope`; no watched-channel intake or live external dispatch was verified. ClickUp is shown at setup-only.
+- The public Slack callback URL and the distinction between account authentication and live-event readiness were corrected.
+- Hosted embeddings, complete Google consent, production-scale concurrency, and the outstanding build-history eligibility question are separate from these results.
+
+The earlier audit below is retained as a historical record. Its test count and connector/video status are superseded by this update and the current README.
+
+---
+
 # Submission audit — October 17, 2026
 
 **Later update:** this report describes the core audit before workplace adapters

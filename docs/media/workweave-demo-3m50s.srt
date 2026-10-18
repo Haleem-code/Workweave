@@ -1,0 +1,251 @@
+1
+00:00:00,464 --> 00:00:03,404
+A late shipment can put customer promises at
+
+2
+00:00:03,287 --> 00:00:07,361
+risk. Workweave connects company knowledge to its evidence,
+
+3
+00:00:07,502 --> 00:00:10,145
+the responsible team, and the next step.
+
+4
+00:00:12,477 --> 00:00:15,404
+First, choose what your company does and where
+
+5
+00:00:15,287 --> 00:00:18,666
+you want to begin. These choices personalize the
+
+6
+00:00:18,548 --> 00:00:23,253
+setup guidance. Here, we are creating KoraBridge Logistics,
+
+7
+00:00:23,368 --> 00:00:26,178
+a fictional company. You can follow the same
+
+8
+00:00:26,061 --> 00:00:28,885
+process with the company packs included in the
+
+9
+00:00:28,768 --> 00:00:29,632
+repository.
+
+10
+00:00:32,450 --> 00:00:36,769
+Add a company profile, procedure, or supported spreadsheet.
+
+11
+00:00:37,054 --> 00:00:40,637
+Workweave shows a preview before anything becomes company
+
+12
+00:00:40,520 --> 00:00:44,593
+knowledge. Review it, confirm the import, then check
+
+13
+00:00:44,476 --> 00:00:48,008
+the suggested company details. The source is saved
+
+14
+00:00:47,891 --> 00:00:52,634
+as versioned evidence in FalkorDB. People and responsibilities
+
+15
+00:00:52,517 --> 00:00:54,902
+still need your review before you rely on
+
+16
+00:00:54,785 --> 00:00:55,198
+them.
+
+17
+00:01:00,477 --> 00:01:02,540
+Now ask what the company does.
+
+18
+00:01:04,824 --> 00:01:07,841
+Workweave answers from the uploaded document.
+
+19
+00:01:10,097 --> 00:01:12,650
+Open the citation to read the passage and
+
+20
+00:01:12,533 --> 00:01:13,939
+check its source version.
+
+21
+00:01:14,821 --> 00:01:16,910
+Then ask who founded the company.
+
+22
+00:01:19,792 --> 00:01:23,144
+The document does not say, so Workweave explains
+
+23
+00:01:23,027 --> 00:01:25,670
+what is missing. It does not assume that
+
+24
+00:01:25,553 --> 00:01:27,848
+the Managing Director is the founder.
+
+25
+00:01:29,590 --> 00:01:33,135
+Conversation history keeps these questions available when you
+
+26
+00:01:33,018 --> 00:01:33,792
+return.
+
+27
+00:01:35,490 --> 00:01:39,552
+Next, open the separate Harbor Supply example. This
+
+28
+00:01:39,435 --> 00:01:43,470
+uses fictional operational records and a deterministic graph
+
+29
+00:01:43,353 --> 00:01:46,743
+workflow. A supplier shipment moves to a later
+
+30
+00:01:46,626 --> 00:01:51,743
+date. Workweave follows recorded dependencies, then checks deadlines
+
+31
+00:01:51,626 --> 00:01:55,711
+and available stock. Two orders need review. Two
+
+32
+00:01:55,594 --> 00:01:58,971
+others are excluded, with the reasons and supporting
+
+33
+00:01:58,854 --> 00:02:02,774
+evidence shown. Orders outside these dependency paths are
+
+34
+00:02:02,657 --> 00:02:03,715
+not assessed.
+
+35
+00:02:05,490 --> 00:02:08,636
+The connected evidence shows how each order depends
+
+36
+00:02:08,519 --> 00:02:12,336
+on the delayed shipment. The investigator identifies the
+
+37
+00:02:12,219 --> 00:02:14,926
+responsible team and saves a handoff to the
+
+38
+00:02:14,809 --> 00:02:19,475
+response coordinator. That coordinator creates two internal review
+
+39
+00:02:19,358 --> 00:02:22,800
+tasks. The trace records what happened and which
+
+40
+00:02:22,682 --> 00:02:24,307
+findings were handed over.
+
+41
+00:02:25,490 --> 00:02:29,217
+Mark a review task complete. Its remembered outcome
+
+42
+00:02:29,100 --> 00:02:32,735
+now reflects that update. Open the saved memory,
+
+43
+00:02:32,876 --> 00:02:36,278
+then refresh the page. The investigation and the
+
+44
+00:02:36,161 --> 00:02:39,849
+updated outcome are still available. A teammate can
+
+45
+00:02:39,731 --> 00:02:42,761
+see what was investigated and what happened afterward,
+
+46
+00:02:42,940 --> 00:02:45,557
+without reconstructing the whole conversation.
+
+47
+00:02:50,455 --> 00:02:53,713
+Work can also start in connected tools Here
+
+48
+00:02:53,901 --> 00:02:57,851
+Slack authenticates the KoraBridge workspace The app provides
+
+49
+00:02:57,763 --> 00:03:01,712
+an HTTPS event callback Channel access still needs
+
+50
+00:03:01,623 --> 00:03:04,561
+Slack permission so this insert shows setup rather
+
+51
+00:03:04,473 --> 00:03:07,791
+than a completed live dispatch Company roles connect
+
+52
+00:03:07,702 --> 00:03:10,904
+people to responsibilities in FalkorDB The
+
+53
+00:03:10,815 --> 00:03:14,375
+task inbox holds requests for human review ClickUp
+
+54
+00:03:14,286 --> 00:03:17,133
+is configured separately with an API token and
+
+55
+00:03:17,044 --> 00:03:20,636
+destination list After approval the worker creates the
+
+56
+00:03:20,548 --> 00:03:23,716
+task records its result and posts a confirmation
+
+57
+00:03:23,627 --> 00:03:24,313
+to Slack
+
+58
+00:03:25,473 --> 00:03:29,250
+FalkorDB stores each company’s evidence dependencies
+
+59
+00:03:29,417 --> 00:03:33,982
+tasks and memory Reviewed tools traverse recorded relationships
+
+60
+00:03:33,894 --> 00:03:38,108
+with parameterized Cypher The graph drives the investigation
+
+61
+00:03:40,490 --> 00:03:44,533
+Workweave understand the change explain the impact and
+
+62
+00:03:44,446 --> 00:03:47,306
+remember the outcome Try the live app and
+
+63
+00:03:47,219 --> 00:03:48,414
+company packs

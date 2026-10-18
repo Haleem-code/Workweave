@@ -13,7 +13,9 @@ verification of the dates or a replacement for source history.
 
 Observed event-period updates include onboarding/settings improvements, the
 Ollama Cloud adapter and validation, production deployment, frontend/backend
-proxy integration, tests, and documentation. These updates do not establish that
+proxy integration, Slack/ClickUp event-and-approval integration, graph assignment,
+durable delivery/recovery fixes, tests, video preparation, and documentation.
+These updates do not establish that
 the main FalkorDB implementation was created during the event.
 
 The [rules](https://www.wemakedevs.org/hackathons/falkordb/rules) require main
@@ -48,12 +50,15 @@ Access to a document alone does not establish permission to use it as demo data.
 | Public source repository | Intended repository: `Haleem-code/Workweave`; confirm public visibility and push current local files |
 | Setup instructions and graph model | README and linked guides |
 | Core Cypher queries | `docs/graph-queries.cypher`, with source references |
-| Working-project video | 3:30 walkthrough recorded locally; public viewing link pending; connector scene deferred until real-account verification |
+| Working-project video | Complete 3:50 MP4 and captions included in `docs/media/`; README and blog link the repository-hosted video. Public links require pushing those files. Slack authentication verified; channel permissions pending; ClickUp setup-only in the recording |
 | Live deployment or complete local setup | Frontend/backend live and local setup included; password onboarding and an Ollama Cloud response verified in the live audit; hosted embeddings and complete Google consent remain unverified |
 | Named track | Company Brain |
 | AI assistance | Disclosed |
 | Event-window history | Prior prototype disclosed; eligibility clarification outstanding |
 
-A README cannot make missing deliverables complete. Record the video, verify the
-advertised demo path, review the code, publish current source, and resolve the
-build-history question before marking the submission ready.
+The latest full backend run passed 57 tests with real disposable FalkorDB and
+controlled external API responses. The production frontend build and TypeScript
+check passed. This is not a claim of a completed live Slack-to-ClickUp dispatch.
+
+Before submitting, push the current source and `docs/media` assets, verify the
+public video link, review the code, and resolve the build-history question.

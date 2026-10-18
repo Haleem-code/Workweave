@@ -29,6 +29,22 @@ RETURN node.payload AS payload, score ORDER BY score DESC;
 // 'conversation', 'run', or another approved record kind.
 MATCH (n:Record {id:$id,kind:$kind}) RETURN n.payload AS payload;
 
+// Source: assignment.py -- eligibility and past-task joins in the company graph.
+MATCH path=(person:Person)-[:HAS_ROLE]->(role:Role)-[:RESPONSIBLE_FOR]->(responsibility:Responsibility)
+WHERE person.active=true AND person.confirmed=true AND person.clickup_id <> ''
+  AND any(term IN $terms WHERE toLower(role.name + ' ' + responsibility.text) CONTAINS term)
+OPTIONAL MATCH (task:ExternalTask)-[:ASSIGNED_TO]->(person)
+RETURN person.payload AS person, [n IN nodes(path) | n.id] AS path_ids,
+  collect(task.payload) AS tasks LIMIT 200;
+
+// Source: store.py -- atomic job claim; projected state is canonical.
+MATCH (n:Record {id:$id, kind:$kind})
+WHERE (n.state IN $from_states)
+  OR (n.state=$to_state AND coalesce(n.lease_until,0) < $now)
+SET n.state=$to_state, n.lease_until=$until, n.lease_owner=$owner,
+  n.attempts=coalesce(n.attempts,0)+1, n.updated_at=$now
+RETURN n.attempts AS attempts, n.payload AS payload;
+
 // Source: graph.py -- indexes created once for each graph.
 CREATE INDEX FOR (n:Record) ON (n.id);
 CREATE FULLTEXT INDEX FOR (n:Chunk) ON (n.text);
